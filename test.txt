@@ -1,0 +1,7 @@
+type: a
+
+# Initial condition
+number of particles: 500
+fill: a0 1
+
+# Rules
