@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: replicator.py 2014-08-05 11:19:10 nineties $
+# $Id: replicator.py 2014-08-05 15:16:38 nineties $
 
 from hchem_v3 import *
 
@@ -7,7 +7,6 @@ sim = HChemSimulator(
     n = 100,    # number of particles
     types = ["a", "b", "c", "d", "e", "f"],
     wildcards = ["x", "y"],
-    state_max = 37, 
     init = [
         ("a0", 3.0/8),
         ("b0", 1.0/8),

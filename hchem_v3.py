@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: pyhchem_v3.py 2014-08-05 12:32:04 nineties $
+# $Id: pyhchem_v3.py 2014-08-05 15:19:41 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -11,12 +11,11 @@ import pygame
 import math, re, time, sys, os
 
 class HChemSimulator:
-    def __init__(self, n, types, state_max, init, rules, wildcards = [],
+    def __init__(self, n, types, init, rules, wildcards = [],
             width = 1300, height = 650, radious = 10, v0 = 10, dt = 0.25):
         self.n         = n
         self.types     = types
         self.wildcards = wildcards
-        self.state_max = state_max
         self.init      = init
         self.rules     = rules
         self.ruleu     = {} # rules for unbound pair
