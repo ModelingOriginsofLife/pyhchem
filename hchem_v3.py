@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: pyhchem_v3.py 2014-08-05 15:49:52 nineties $
+# $Id: pyhchem_v3.py 2014-08-05 15:55:53 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -506,61 +506,6 @@ class HChemViewer:
                 pygame.draw.line(self.screen, self.BOND_COLOR,
                     self.sim.pos[k,:], self.sim.pos[l,:])
 
+        self.check_event()
         pygame.display.flip()
         self.root.after(self.INTERVAL[self.speed], self.draw)
-
-#            # Other info
-#            if self.binding:
-#                pygame.draw.line(self.screen, self.BOND_COLOR,
-#                    self.sim.pos[self.dragged,:],
-#                    pygame.mouse.get_pos())
-#
-#            self.check_event()
-#            pygame.display.update()
-#            self.root.update()
-
-#class HChemViewer:
-#    INFO = [
-#    "(P) play/pause, (F) stepwise, (Q) quit, (S) save snapshot, (L) load snapshot, (R) load rule, (T) show/hide particle types, (up) speed up, (down) slow down",
-#    "(left drag) move particle, (right drag) bind particles, (double click) change particle type'
-#    ]
-#
-#    def __init__(self, sim, interval=0.1):
-#        self.sim      = sim
-#        self.w        = sim.w
-#        self.h        = sim.h
-#        self.interval = interval
-#
-#        self.pause    = False
-#        self.stepwise = False
-#        self.dragged  = None
-#        self.moving   = False # True when moving a particle
-#        self.binding  = False # True when binding particles
-#        self.display_types = False
-#        self.prev_lclick   = time.time()
-#
-#        self.setup_colormap()
-#        self.setup_screen()
-#        self.setup_info_text()
-#
-#    # Setup map table from types to colors
-#    def setup_colormap(self):
-#        table = self.COLORTABLE
-#        self.cmap = {}
-#        for i in range(len(self.sim.types)):
-#            self.cmap[self.sim.types[i]] = table[i % len(table)]
-#
-#    def setup_screen(self):
-#        pygame.init()
-#        self.screen = pygame.display.set_mode((self.w, self.h)
-#            #, pygame.DOUBLEBUF | pygame.FULLSCREEN | pygame.HWSURFACE
-#            )
-#        pygame.display.set_caption('Tim Hutton's Artificial Chemistry')
-#        self.fontsize = 18
-#        self.font = pygame.font.SysFont(None, self.fontsize)
-#
-#    def setup_info_text(self):
-#        info_texts = self.INFO + map(str, self.sim.rules)
-#        self.info = map(lambda text:
-#                self.font.render(text, False, self.TEXT_COLOR),
-#                info_texts)
