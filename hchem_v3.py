@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: pyhchem_v3.py 2014-08-05 15:19:41 nineties $
+# $Id: pyhchem_v3.py 2014-08-05 15:49:52 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -95,18 +95,18 @@ class HChemSimulator:
         if lbnd:
             if not (lt0,ls0,lt1,ls1) in self.ruleb:
                 self.ruleb[(lt0,ls0,lt1,ls1)] = []
-                if lt0 != lt1 and ls0 != ls1:
+                if lt0 != lt1 or ls0 != ls1:
                     self.ruleb[(lt1,ls1,lt0,ls0)] = []
             self.ruleb[(lt0,ls0,lt1,ls1)].append((rt0,rs0,rt1,rs1,rbnd,p))
-            if lt0 != lt1 and ls0 != ls1:
+            if lt0 != lt1 or ls0 != ls1:
                 self.ruleb[(lt1,ls1,lt0,ls0)].append((rt0,rs0,rt1,rs1,rbnd,p))
         else:
             if not (lt0,ls0,lt1,ls1) in self.ruleu:
                 self.ruleu[(lt0,ls0,lt1,ls1)] = []
-                if lt0 != lt1 and ls0 != ls1:
+                if lt0 != lt1 or ls0 != ls1:
                     self.ruleu[(lt1,ls1,lt0,ls0)] = []
             self.ruleu[(lt0,ls0,lt1,ls1)].append((rt0,rs0,rt1,rs1,rbnd,p))
-            if lt0 != lt1 and ls0 != ls1:
+            if lt0 != lt1 or ls0 != ls1:
                 self.ruleu[(lt1,ls1,lt0,ls0)].append((rt1,rs1,rt0,rs0,rbnd,p))
 
     def add_new_rule(self, rule, prob):
@@ -334,7 +334,7 @@ class HChemViewer:
                 width = self.sim.w, height = self.sim.h)
         self.embed.pack()
         os.environ['SDL_WINDOWID'] = str(self.embed.winfo_id())
-        os.environ['SDL_VIDEODRIVER'] = 'windib'
+        #os.environ['SDL_VIDEODRIVER'] = 'windib'
         pygame.init()
         self.screen = pygame.display.set_mode((self.sim.w, self.sim.h)
             #, pygame.DOUBLEBUF | pygame.FULLSCREEN | pygame.HWSURFACE
