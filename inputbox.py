@@ -19,7 +19,7 @@ def get_key():
   while 1:
     event = pygame.event.poll()
     if event.type == KEYDOWN:
-      return event.key, event.unicode
+      return event.key
     else:
       pass
 
@@ -45,7 +45,7 @@ def ask(screen, question):
   current_string = []
   display_box(screen, question + ": " + string.join(current_string,""))
   while 1:
-    inkey, code = get_key()
+    inkey = get_key()
     if inkey == K_BACKSPACE:
       current_string = current_string[0:-1]
     elif inkey == K_RETURN:
@@ -53,7 +53,7 @@ def ask(screen, question):
     elif inkey == K_MINUS:
       current_string.append("_")
     elif inkey <= 127:
-      current_string.append(code)
+      current_string.append(chr(inkey))
     display_box(screen, question + ": " + string.join(current_string,""))
   return string.join(current_string,"")
 

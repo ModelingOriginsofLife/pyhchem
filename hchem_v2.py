@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-05 10:18:50 nineties $
+# $Id: hchem-v2.py 2014-08-05 10:06:51 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -61,25 +61,27 @@ class Rule:
         q = re.search(r'([a-zA-Z]+)(\d+)', M1)
         return (p.group(1), p.group(2), q.group(1), q.group(2), bnd)
 
-    def add_rule(self, L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd):
+    def add_rule(self, L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd, p):
         LL0 = self.to_index(L0, l0)
         LL1 = self.to_index(L1, l1)
         RR0 = self.to_index(R0, r0)
         RR1 = self.to_index(R1, r1)
         if lbnd:
-            if (LL0, LL1) in self.ruleb:
-                raise Exception("The pattern of left hand side is duplicated: ",
-                    L0 + l0 + "-" + L1 + l1)
-            self.ruleb[(LL0, LL1)] = (RR0, RR1, rbnd)
+            if not (LL0, LL1) in self.ruleb:
+                self.ruleb[(LL0, LL1)] = []
+                if LL0 != LL1:
+                    self.ruleb[(LL1, LL0)] = []
+            self.ruleb[(LL0, LL1)].append((RR0, RR1, rbnd, p))
             if LL0 != LL1:
-                self.ruleb[(LL1, LL0)] = (RR1, RR0, rbnd)
+                self.ruleb[(LL1, LL0)].append((RR1, RR0, rbnd, p))
         else:
-            if (LL0, LL1) in self.ruleu:
-                raise Exception("The pattern of left hand side is duplicated: ",
-                    L0 + l0 + " " + L1 + l1)
-            self.ruleu[(LL0, LL1)] = (RR0, RR1, rbnd)
+            if not (LL0, LL1) in self.ruleu:
+                self.ruleu[(LL0, LL1)] = []
+                if LL0 != LL1:
+                    self.ruleu[(LL1, LL0)] = []
+            self.ruleu[(LL0, LL1)].append((RR0, RR1, rbnd, p))
             if LL0 != LL1:
-                self.ruleu[(LL1, LL0)] = (RR1, RR0, rbnd)
+                self.ruleu[(LL1, LL0)].append((RR1, RR0, rbnd, p))
 
     def parse_rule(self, line):
         try:
@@ -87,6 +89,10 @@ class Rule:
         except:
             return
         self.rule_texts.append(line)
+        prob = 1.0
+        if ":" in rhs:
+            rhs, p = rhs.split(":")
+            prob = eval(p.strip())
         L0, l0, L1, l1, lbnd = self.parse_expr(lhs.strip())
         R0, r0, R1, r1, rbnd = self.parse_expr(rhs.strip())
         if L0 in self.wildcards and L1 in self.wildcards:
@@ -98,7 +104,7 @@ class Rule:
                     else:        _R0 = R0
                     if R1 == L0: _R1 = t
                     else:        _R1 = R1
-                    self.add_rule(_L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd)
+                    self.add_rule(_L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd, prob)
             else:
                 for t0 in self.types:
                     for t1 in self.types:
@@ -111,7 +117,7 @@ class Rule:
                         if R1 == L0:   _R1 = t0
                         elif R1 == L1: _R1 = t1
                         else:          _R1 = R1
-                        self.add_rule(_L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd)
+                        self.add_rule(_L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd, prob)
         elif L0 in self.wildcards or L1 in self.wildcards:
             if L0 in self.wildcards:
                 for t in self.types:
@@ -120,7 +126,7 @@ class Rule:
                     else:        _R0 = R0
                     if R1 == L0: _R1 = t
                     else:        _R1 = R1
-                    self.add_rule(_L0, l0, L1, l1, lbnd, _R0, r0, _R1, r1, rbnd)
+                    self.add_rule(_L0, l0, L1, l1, lbnd, _R0, r0, _R1, r1, rbnd, prob)
             else:
                 for t in self.types:
                     _L1 = t
@@ -128,9 +134,9 @@ class Rule:
                     else:        _R0 = R0
                     if R1 == L1: _R1 = t
                     else:        _R1 = R1
-                    self.add_rule(L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd)
+                    self.add_rule(L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd, prob)
         else:
-            self.add_rule(L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd)
+            self.add_rule(L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd, prob)
 
     def add_type(self, t):
         self.types.append(t)
@@ -189,7 +195,7 @@ class HChem:
     # k   : strength of bonds
     # w,h : width and height of the universe
     # seed: random seed
-    def __init__(self, filename, n = 1000, r = 10, v0 = None, dt = 0.2,
+    def __init__(self, filename, n = 1000, r = 10, v0 = None, dt = 0.1,
                  width = 1200, height = 700, bucket_size = None, seed=None):
         self.rule = Rule(filename)
         if seed: np.random.seed(seed)
@@ -204,18 +210,18 @@ class HChem:
         self.h = height
 
         # Initialize positions of particles
-        self.pos = np.zeros((n, 2))
-        self.pos[:,0] = np.random.uniform(r, width-r, n)
-        self.pos[:,1] = np.random.uniform(r, height-r, n)
+        self.pos = np.zeros((self.n, 2))
+        self.pos[:,0] = np.random.uniform(r, width-r, self.n)
+        self.pos[:,1] = np.random.uniform(r, height-r, self.n)
 
         # Initialize velocities of particles
-        direction = np.random.uniform(0, 2*np.pi, n)
-        self.vel = np.zeros((n, 2))
+        direction = np.random.uniform(0, 2*np.pi, self.n)
+        self.vel = np.zeros((self.n, 2))
         self.vel[:,0] = v0*np.cos(direction)
         self.vel[:,1] = v0*np.sin(direction)
 
         # Initialize types
-        self.types = np.zeros(n, dtype=int)
+        self.types = np.zeros(self.n, dtype=int)
         for k in xrange(self.n):
             p = np.random.uniform(0, 1)
             q = 0
@@ -224,10 +230,20 @@ class HChem:
                 if p < q:
                     self.types[k] = self.rule.get_index(t)
                     break
+        
+        for k in xrange(self.n):
+            if self.pos[k, 0]  > self.w/2:
+                self.types[k] = self.rule.get_index("a1")
+        for k in xrange(35):
+            self.pos[k, 0] = self.w/2
+            self.pos[k, 1] = k*2*self.r + self.r
+            self.types[k] = self.rule.get_index("m0")
+
+        self.fixed = np.zeros(self.n, dtype=int)
 
         # self.bonds[i] == list of indexes of particles which is bound to i.
-        self.bonds = np.zeros(n, dtype=object)
-        for i in xrange(n): self.bonds[i] = []
+        self.bonds = np.zeros(self.n, dtype=object)
+        for i in xrange(self.n): self.bonds[i] = []
 
         # Initialize buckets for compute_collision detection
         self.bucket_size = bucket_size
@@ -267,44 +283,57 @@ class HChem:
     def update_state_of_particle_pair(self, k, l):
         if l in self.bonds[k]:
             # bound pair
-            r = self.rule.check(self.types[k], self.types[l], True)
-            if r:
-                self.types[k] = r[0]
-                self.types[l] = r[1]
-                if not r[2]:
-                    self.bonds[k].remove(l)
-                    self.bonds[l].remove(k)
-                    return False
+            rules = self.rule.check(self.types[k], self.types[l], True)
+            if rules:
+                for r in rules:
+                    p = r[3]
+                    if np.random.uniform(0, 1) < p:
+                        self.types[k] = r[0]
+                        self.types[l] = r[1]
+                        if not r[2]:
+                            self.bonds[k].remove(l)
+                            self.bonds[l].remove(k)
+                            return False
+                        return True
             return True
         else:
             # unbound pair
-            r = self.rule.check(self.types[k], self.types[l], False)
-            if r:
-                self.types[k] = r[0]
-                self.types[l] = r[1]
-                if r[2]:
-                    self.bonds[k].append(l)
-                    self.bonds[l].append(k)
-                    return True
+            rules = self.rule.check(self.types[k], self.types[l], False)
+            if rules:
+                for r in rules:
+                    p = r[3]
+                    if np.random.uniform(0, 1) < p:
+                        self.types[k] = r[0]
+                        self.types[l] = r[1]
+                        if r[2]:
+                            self.bonds[k].append(l)
+                            self.bonds[l].append(k)
+                            return True
+                        return False
             return False
 
-    def add_impulse_between_unbound_pair(self, k, l, rx, rv, d2):
+    def add_impulse_between_unbound_pair(self, k, l):
+        rx = self.pos[k,:] - self.pos[l,:]
+        d2 = np.sum(rx*rx)
+        if d2 > 4*self.r*self.r: return
+        rv = self.vel[k,:] - self.vel[l,:]
+        c  = rx.dot(rv)
+        if c >= 0: return
         if self.update_state_of_particle_pair(k, l):
             return
         d = math.sqrt(d2)
-        n = rx/d
-        ldt = -n.dot(rv)
-        self.vel[k,:] += ldt*n
-        self.vel[l,:] -= ldt*n
+        fdt = -c*rx/d2
+        self.vel[k,:] += fdt
+        self.vel[l,:] -= fdt
 
     def add_impulse_between_bound_pair(self, k, l, rx, rv, d2):
         d = math.sqrt(d2)
         n = rx/d
         c = rx.dot(rv)
-        #ldt = -(2*c + 3*(d2-4*self.r*self.r))/(8*d2)
+        #ldt = -(2*c + 2*(d2-4*self.r*self.r))/(8*d2)
         #self.vel[k,:] += 2*ldt*rx
         #self.vel[l,:] -= 2*ldt*rx
-        if (d < 2*self.r and c < 0) or (d > 2*self.r and c > 0):
+        if (d < 2*self.r and c < 0) or (d > 3*self.r and c > 0):
             ldt = -n.dot(rv)
             self.vel[k,:] += ldt*n
             self.vel[l,:] -= ldt*n
@@ -313,12 +342,7 @@ class HChem:
         if i < 0 or j < 0 or i >= self.nbx or j >= self.nby: return
         for l in self.buckets[i, j]:
             if k >= l: continue
-            rx = self.pos[k,:] - self.pos[l,:]
-            rv = self.vel[k,:] - self.vel[l,:]
-            if rx.dot(rv) >= 0: continue
-            d2 = np.sum(rx*rx)
-            if d2 > 4*self.r*self.r: continue
-            self.add_impulse_between_unbound_pair(k, l, rx, rv, d2)
+            self.add_impulse_between_unbound_pair(k, l)
 
     def add_impulse_between_particles(self):
         r = self.r
@@ -329,8 +353,6 @@ class HChem:
             self.add_impulse_between_particles_sub(k, i-1, j)
             self.add_impulse_between_particles_sub(k, i-1, j-1)
             self.add_impulse_between_particles_sub(k, i-1 ,j+1)
-            self.add_impulse_between_particles_sub(k, i, j-1)
-            self.add_impulse_between_particles_sub(k, i, j)
             self.add_impulse_between_particles_sub(k, i, j+1)
             self.add_impulse_between_particles_sub(k, i+1, j-1)
             self.add_impulse_between_particles_sub(k, i+1, j)
@@ -346,59 +368,59 @@ class HChem:
                 d2 = np.sum(rx*rx)
                 self.add_impulse_between_bound_pair(k, l, rx, rv, d2)
 
-    def compute_impulse(self):
-        self.add_impulse_from_walls()
-        self.add_impulse_between_particles()
-        self.add_impulse_between_bound_particles()
-        self.pos += self.vel*self.dt
+    def add_impulse_from_bond(self, k, l, p, d, e):
+        rx = self.pos[p,:] - self.pos[l,:]
+        c  = rx.dot(e)
+        if c < 0 or c > d: return
+        h = rx - c*e
+        if np.sum(h*h) > 1.1*self.r*self.r:
+            return
+        if self.vel[p,:].dot(h) > 0:
+            return
+        v  = self.vel[p, :]
+        vh = v - v.dot(e)*e
+        r  = c/d
+        self.vel[p, :] += -2*vh
+        self.vel[k, :] += r*2*vh
+        self.vel[l, :] += (1-r)*2*vh
+
+    def add_impulse_from_bonds_sub(self, k, l, i, j, d, e):
+        for p in self.buckets[i, j]:
+            if k == p or l == p: continue
+            self.add_impulse_from_bond(k, l, p, d, e)
+
+    def add_impulse_from_bonds(self):
+        for k in xrange(self.n):
+            for l in self.bonds[k]:
+                if k >= l: continue
+                rx = self.pos[k, :] - self.pos[l, :]
+                d  = math.sqrt(np.sum(rx*rx))
+                e  = rx/d
+                i1, j1 = self.bucket_index(self.pos[k, :])
+                i2, j2 = self.bucket_index(self.pos[l, :])
+                if i1 > i2: i1, i2 = i2, i1
+                if j1 > j2: j1, j2 = j2, j1
+                i1 = max(i1-1, 0)
+                i2 = min(i2+1, self.nbx-1)
+                j1 = max(j1-1, 0)
+                j2 = min(j2+1, self.nby-1)
+                for i in xrange(i1, i2+1):
+                    for j in xrange(j1, j2+1):
+                        self.add_impulse_from_bonds_sub(k, l, i, j, d, e)
+
 
     def update(self):
         self.init_bucket()
-        # Update position
-        self.compute_impulse()
-        self.compute_impulse()
-        self.compute_impulse()
-        # Fix collision of free particles
-        #self.fix_collision_with_walls()
-        #self.fix_collision_with_particles()
+        self.add_impulse_from_bonds()
+        self.add_impulse_from_walls()
+        self.add_impulse_between_bound_particles()
+        self.add_impulse_between_particles()
 
-
-        #x = self.pos[0,0]
-        #y = self.pos[0,1]
-        #if x < self.r:
-        #    p = np.array([0, y])
-        #elif x > self.w-self.r:
-        #    p = np.array([self.w, y])
-        #elif y < self.r:
-        #    p = np.array([x, 0])
-        #elif y > self.h-self.r:
-        #    p = np.array([x, self.h])
-        #else:
-        #    return
-
-        #r = self.pos[0,:] - p
-        #ldt = - r.dot(self.vel[0,:])/np.sum(r*r) 
-        #self.vel[0,:] += ldt * 2 * r
-
-        # Symplectic Euler
-        #self.init_bucket()
-        #force = self.compute_force()
-        #self.vel += force*self.dt
-        #self.pos += self.vel*self.dt
-
-        # Leap Frog
-        #self.init_bucket()
-        #force = self.compute_force()
-        #pvel = self.pvel
-        #self.pvel = self.vel
-        #self.vel = pvel + 2*self.dt*force
-        #self.pos += 2*self.dt*self.vel
-
-        # Forward Euler
-        #self.init_bucket()
-        #force = self.compute_force()
-        #self.pos += self.vel*self.dt
-        #self.vel += force*self.dt
+        for k in xrange(self.n):
+            if self.fixed[k] == 1:
+                self.vel[k,:] = 0
+        self.pos += self.vel*self.dt
+        
     def total_energy(self):
         return np.sum(self.vel*self.vel)
 
@@ -493,16 +515,18 @@ class HChemViewer:
                 # Detect double click
                 t = time.time()
                 double_click = False
-                if l and t - self.prev_lclick < 1.0/3:
+                if t - self.prev_lclick < 1.0/3:
                     double_click = True
                 self.prev_lclick = t
 
-                if double_click:
+                if l and double_click:
                     t = inputbox.ask(self.screen, "type")
                     try:
                         self.sim.types[clicked] = self.sim.rule.get_index(t)
                     except:
                         pass
+                elif r and double_click:
+                    self.sim.fixed[clicked] = not self.sim.fixed[clicked]
                 elif clicked:
                     self.dragged = clicked
                     if l: self.move = True
@@ -587,5 +611,5 @@ if __name__ == '__main__':
     if len(sys.argv) >= 2:
         sim = HChem(sys.argv[1])
     else:
-        sim = HChem("replicator.txt", n=500)
+        sim = HChem("diode.txt")
     HChemViewer(sim).loop()
