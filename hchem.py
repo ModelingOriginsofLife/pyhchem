@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-06 12:39:00 nineties $
+# $Id: hchem.py 2014-08-06 15:57:44 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -7,6 +7,12 @@ import numpy as np
 import numpy.linalg as la
 import pygame, inputbox, pickle
 import re, sys, time, math
+
+def ask(screen, msg):
+    print msg
+    print ">", 
+    line = sys.stdin.readline().strip()
+    return line
 
 class Rule:
     def __init__(self, filename):
@@ -468,10 +474,10 @@ class HChemViewer:
                 if key[pygame.K_p]:
                     self.play = not self.play
                 if key[pygame.K_s]:
-                    fname = inputbox.ask(self.screen, "filename")
+                    fname = ask(self.screen, "filename")
                     if fname: self.sim.save(fname)
                 if key[pygame.K_l]:
-                    fname = inputbox.ask(self.screen, "filename")
+                    fname = ask(self.screen, "filename")
                     if fname: self.sim = HChem.load(fname)
                 if key[pygame.K_t]:
                     self.display_types = not self.display_types
@@ -479,7 +485,7 @@ class HChemViewer:
                     self.stepwise = True
                     self.play = True
                 if key[pygame.K_r]:
-                    fname = inputbox.ask(self.screen, "filename")
+                    fname = ask(self.screen, "filename")
                     self.sim.load_rule(fname)
                     info_texts = self.INFO + sim.rule.rule_texts
                     self.info = map(lambda text: self.font.render(text, False,
@@ -498,7 +504,7 @@ class HChemViewer:
                 self.prev_lclick = t
 
                 if double_click:
-                    t = inputbox.ask(self.screen, "type")
+                    t = ask(self.screen, "type")
                     try:
                         self.sim.types[clicked] = self.sim.rule.get_index(t)
                     except:
@@ -587,5 +593,5 @@ if __name__ == '__main__':
     if len(sys.argv) >= 2:
         sim = HChem(sys.argv[1])
     else:
-        sim = HChem("evolutive_membrane.py", n=100)
+        sim = HChem("evolutive_membrane.txt", n=100)
     HChemViewer(sim).loop()
