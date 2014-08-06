@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: pyhchem_v3.py 2014-08-05 17:16:08 nineties $
+# $Id: pyhchem_v3.py 2014-08-05 16:33:35 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -12,8 +12,7 @@ import math, re, time, sys, os
 
 class HChemSimulator:
     def __init__(self, n, types, init, rules, wildcards = [],
-            width = 1300, height = 650, radious = 10, v0 = 10, dt = 0.3):
-        self.gen       = 0
+            width = 1300, height = 650, radious = 10, v0 = 10, dt = 0.25):
         self.n         = n
         self.types     = types
         self.wildcards = wildcards
@@ -32,8 +31,8 @@ class HChemSimulator:
         for k in range(5):
             self.update()
         self.setup_rules()
-        print "Start"
-        print time.time()
+        print self.ruleu
+        print self.ruleb
 
     # Convert "a0" to "a" and 0
     def parse_type(self, t):
@@ -100,7 +99,7 @@ class HChemSimulator:
                     self.ruleb[(lt1,ls1,lt0,ls0)] = []
             self.ruleb[(lt0,ls0,lt1,ls1)].append((rt0,rs0,rt1,rs1,rbnd,p))
             if lt0 != lt1 or ls0 != ls1:
-                self.ruleb[(lt1,ls1,lt0,ls0)].append((rt1,rs1,rt0,rs0,rbnd,p))
+                self.ruleb[(lt1,ls1,lt0,ls0)].append((rt0,rs0,rt1,rs1,rbnd,p))
         else:
             if not (lt0,ls0,lt1,ls1) in self.ruleu:
                 self.ruleu[(lt0,ls0,lt1,ls1)] = []
@@ -263,10 +262,6 @@ class HChemSimulator:
         self.pos += self.vel*self.dt
 
     def update(self):
-        self.gen += 1
-        if self.gen == 1000:
-            print "Finished"
-            print time.time()
         self.compute_impulse()
         self.compute_impulse()
         self.compute_impulse()
@@ -275,6 +270,7 @@ class HChemSimulator:
         return np.sum(self.mass * np.sum(self.vel**2,axis=1))/2
 
 class HChemViewer:
+    INTERVAL = [1000, 100, 50, 0] # in ms
     TEXT_COLOR = (0, 0, 0)
     BACKGROUND_COLOR = (255, 255, 255)
     BOND_COLOR = (0, 0, 0)
@@ -298,8 +294,7 @@ class HChemViewer:
 
     def __init__(self, sim):
         self.sim  = sim
-        self.speed = 1
-        self.counter = 0
+        self.speed = 2
         self.play     = True
         self.stepwise = False
         self.dragged  = None
@@ -340,18 +335,13 @@ class HChemViewer:
                 width = self.sim.w, height = self.sim.h)
         self.embed.pack()
         os.environ['SDL_WINDOWID'] = str(self.embed.winfo_id())
-        # os.environ['SDL_VIDEODRIVER'] = 'windib'
+        os.environ['SDL_VIDEODRIVER'] = 'windib'
         pygame.init()
         self.screen = pygame.display.set_mode((self.sim.w, self.sim.h)
             #, pygame.DOUBLEBUF | pygame.FULLSCREEN | pygame.HWSURFACE
             )
         self.fontsize = 18
         self.font = pygame.font.SysFont(None, self.fontsize)
-
-        # Mouse events
-        # self.embed.bind('<Button-1>', self.mouse_clicked)
-        # self.embed.bind('<B1-Motion>', self.mouse_move)
-        # self.embed.bind('<ButtonRelease-1>', self.mouse_release)
 
     def setup_menu(self):
         self.menu = tk.Menu(self.root)
@@ -404,10 +394,9 @@ class HChemViewer:
         self.stepwise = True
 
     def cmd_faster(self, *event):
-        self.speed = max(self.speed - 1, 1)
-
+        self.speed = min(self.speed + 1, len(self.INTERVAL)-1)
     def cmd_slower(self, *event):
-        self.speed = min(self.speed + 1, 1000)
+        self.speed = max(self.speed - 1, 0)
 
     def quit(self, *event):
         # XXX: Check whether this simulation is saved or not.
@@ -426,55 +415,55 @@ class HChemViewer:
     def save_rule(self, *event):
         print 'Save Rule'
 
-    #def check_event(self):
-    #    for event in pygame.event.get():
-    #        if event.type == pygame.KEYDOWN:
-    #            key = pygame.key.get_pressed()
-    #            if key[pygame.K_RSHIFT] or key[pygame.K_LSHIFT]:
-    #                self.shift = True
-    #        if event.type == pygame.KEYUP:
-    #            key = pygame.key.get_pressed()
-    #            if not key[pygame.K_RSHIFT] and not key[pygame.K_LSHIFT]:
-    #                self.shift = False
-    #        print self.shift
-    #        if not self.dragged and event.type == pygame.MOUSEBUTTONDOWN:
-    #            self.play = False
-    #            clicked = self.get_clicked()
-    #            l,m,r = pygame.mouse.get_pressed()
+    def check_event(self):
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                key = pygame.key.get_pressed()
+                if key[pygame.K_RSHIFT] or key[pygame.K_LSHIFT]:
+                    self.shift = True
+            if event.type == pygame.KEYUP:
+                key = pygame.key.get_pressed()
+                if not key[pygame.K_RSHIFT] and not key[pygame.K_LSHIFT]:
+                    self.shift = False
+            print self.shift
+            if not self.dragged and event.type == pygame.MOUSEBUTTONDOWN:
+                self.play = False
+                clicked = self.get_clicked()
+                l,m,r = pygame.mouse.get_pressed()
 
-    #            # Detect double click
-    #            t = time.time()
-    #            double_click = False
-    #            if l and t - self.prev_lclick < 1.0/3:
-    #                double_click = True
-    #            self.prev_lclick = t
+                # Detect double click
+                t = time.time()
+                double_click = False
+                if l and t - self.prev_lclick < 1.0/3:
+                    double_click = True
+                self.prev_lclick = t
 
-    #            if double_click:
-    #                t = inputbox(self.root, 'type')
-    #                try:
-    #                    self.sim.types[clicked] = self.sim.get_index(t)
-    #                except:
-    #                    pass
-    #            elif clicked:
-    #                self.dragged = clicked
-    #                if self.shift:
-    #                    self.binding = True
-    #                else:
-    #                    self.moving = True
-    #        elif self.dragged and event.type == pygame.MOUSEMOTION:
-    #            l,m,r = pygame.mouse.get_pressed()
-    #            if self.moving:
-    #                self.sim.pos[self.dragged,:] = pygame.mouse.get_pos()
-    #        elif self.dragged and event.type == pygame.MOUSEBUTTONUP:
-    #            if self.binding:
-    #                 clicked = self.get_clicked()
-    #                 if clicked and self.dragged != clicked and\
-    #                         not (clicked in self.sim.bonds[self.dragged]):
-    #                     self.sim.bonds[self.dragged].append(clicked)
-    #                     self.sim.bonds[clicked].append(self.dragged)
-    #            self.moving  = False
-    #            self.binding = False
-    #            self.dragged = None
+                if double_click:
+                    t = inputbox(self.root, 'type')
+                    try:
+                        self.sim.types[clicked] = self.sim.get_index(t)
+                    except:
+                        pass
+                elif clicked:
+                    self.dragged = clicked
+                    if self.shift:
+                        self.binding = True
+                    else:
+                        self.moving = True
+            elif self.dragged and event.type == pygame.MOUSEMOTION:
+                l,m,r = pygame.mouse.get_pressed()
+                if self.moving:
+                    self.sim.pos[self.dragged,:] = pygame.mouse.get_pos()
+            elif self.dragged and event.type == pygame.MOUSEBUTTONUP:
+                if self.binding:
+                     clicked = self.get_clicked()
+                     if clicked and self.dragged != clicked and\
+                             not (clicked in self.sim.bonds[self.dragged]):
+                         self.sim.bonds[self.dragged].append(clicked)
+                         self.sim.bonds[clicked].append(self.dragged)
+                self.moving  = False
+                self.binding = False
+                self.dragged = None
 
     def get_clicked(self):
         for k in xrange(self.sim.n):
@@ -485,16 +474,14 @@ class HChemViewer:
         return None
 
     def loop(self):
-        self.draw()
-        self.root.mainloop()
+        while True:
+            self.draw()
+        #self.root.mainloop()
 
     def draw(self):
-        self.counter += 1
         sim = self.sim
-        if self.play and self.counter % self.speed == 0:
-            #for k in range(10):
+        if self.play:
             sim.update()
-
         if self.stepwise:
             self.play = False
             self.stepwise = False
@@ -528,5 +515,10 @@ class HChemViewer:
                 pygame.draw.line(self.screen, self.BOND_COLOR,
                     self.sim.pos[k,:], self.sim.pos[l,:])
 
+        self.check_event()
         pygame.display.flip()
-        self.root.after(1, self.draw)
+        self.root.update()
+        #if self.dragged:
+        #    self.root.after(1, self.draw)
+        #else:
+        #    self.root.after(self.INTERVAL[self.speed], self.draw)

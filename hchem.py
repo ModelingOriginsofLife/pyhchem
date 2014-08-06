@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-05 10:18:50 nineties $
+# $Id: hchem.py 2014-08-06 12:39:00 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -189,7 +189,7 @@ class HChem:
     # k   : strength of bonds
     # w,h : width and height of the universe
     # seed: random seed
-    def __init__(self, filename, n = 1000, r = 10, v0 = None, dt = 0.2,
+    def __init__(self, filename, n = 1000, r = 10, v0 = None, dt = 0.1,
                  width = 1200, height = 700, bucket_size = None, seed=None):
         self.rule = Rule(filename)
         if seed: np.random.seed(seed)
@@ -587,5 +587,5 @@ if __name__ == '__main__':
     if len(sys.argv) >= 2:
         sim = HChem(sys.argv[1])
     else:
-        sim = HChem("replicator.txt", n=500)
+        sim = HChem("evolutive_membrane.py", n=100)
     HChemViewer(sim).loop()
