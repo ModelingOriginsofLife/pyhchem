@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 20:04:22 nineties $
+# $Id: hchem.py 2014-08-07 20:12:44 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -504,14 +504,14 @@ class HChem:
                 types.append(t)
             for k in xrange(n):
                 bonds.append(map(int, f.readline().strip().split()))
-            sim.n = n
-            sim.dt = dt
-            sim.pos = np.array(pos)
-            sim.vel = np.array(vel)
-            sim.stypes = np.array(types)
-            sim.types = np.array(map(lambda t: sim.rule.get_index(t), sim.stypes))
+            self.n = n
+            self.dt = dt
+            self.pos = np.array(pos)
+            self.vel = np.array(vel)
+            self.stypes = np.array(types)
+            self.types = np.array(map(lambda t: self.rule.get_index(t), self.stypes))
             self.name = types
-            sim.bonds = bonds
+            self.bonds = bonds
 
     def load(self, fname, type):
         if type == "particles":
