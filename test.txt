@@ -1,7 +1,9 @@
-type: a
+type: A
 
 # Initial condition
-number of particles: 500
-fill: a0 1
+number of particles: 200
+state max: 100
+fill: A0 0.2, A1 0.2, A2 0.2, A3 0.2, A4 0.2
 
 # Rules
+Ax Ax -> Ax-Ax

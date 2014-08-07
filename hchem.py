@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 10:11:14 nineties $
+# $Id: hchem.py 2014-08-07 10:27:39 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -61,8 +61,8 @@ class Rule:
         else:
             bnd = False
             M0, M1 = str.split()
-        p = re.search(r'([a-zA-Z]+)(\d+)', M0)
-        q = re.search(r'([a-zA-Z]+)(\d+)', M1)
+        p = re.search(r'([a-wzA-Z]+)(\d+|[xy])', M0)
+        q = re.search(r'([a-wzA-Z]+)(\d+|[xy])', M1)
         return (p.group(1), p.group(2), q.group(1), q.group(2), bnd)
 
     def add_rule(self, L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd):
@@ -136,6 +136,7 @@ class Rule:
         elif l0 in self.wildstates and l1 in self.wildstates:
             if l0 == l1:
                 for s in range(self.state_max+1):
+                    s = str(s)
                     _l0 = s
                     _l1 = s
                     if r0 == l0: _r0 = s
@@ -147,6 +148,8 @@ class Rule:
                 for s0 in range(self.state_max+1):
                     for s1 in range(self.state_max+1):
                         if l0 == l1 and s0 > s1: continue
+                        s0 = str(s0)
+                        s1 = str(s1)
                         _l0 = s0
                         _l1 = s1
                         if r0 == l0:   _r0 = s0
@@ -159,6 +162,7 @@ class Rule:
         elif l0 in self.wildstates or l1 in self.wildstates:
             if l0 in self.wildstates:
                 for s in range(self.state_max + 1):
+                    s = str(s)
                     _l0 = s
                     if r0 == l0: _r0 = s
                     else:        _r0 = r0
@@ -167,6 +171,7 @@ class Rule:
                     self.add_rule(L0, _l0, L1, l1, lbnd, R0, _r0, R1, _r1, rbnd)
             else:
                 for s in range(self.state_max + 1):
+                    s = str(s)
                     _l1 = s
                     if r0 == L1: _r0 = s
                     else:        _r0 = r0
@@ -638,5 +643,5 @@ if __name__ == '__main__':
     if len(sys.argv) >= 2:
         sim = HChem(sys.argv[1])
     else:
-        sim = HChem("evolutive_membrane.txt")
+        sim = HChem("test.txt")
     HChemViewer(sim).loop()
