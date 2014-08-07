@@ -1,4 +1,4 @@
-type: A, B
+type: A, B, C
 
 # Initial condition
 number of particles: 200
