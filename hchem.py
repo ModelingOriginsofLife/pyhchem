@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 14:43:07 nineties $
+# $Id: hchem.py 2014-08-07 14:44:43 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -124,16 +124,10 @@ class Rule:
         RR0 = self.to_index(R0, r0)
         RR1 = self.to_index(R1, r1)
         if lbnd:
-            if (LL0, LL1) in self.ruleb:
-                raise Exception("The pattern of left hand side is duplicated: ",
-                    L0 + l0 + "-" + L1 + l1)
             self.ruleb[(LL0, LL1)] = (RR0, RR1, rbnd)
             if LL0 != LL1:
                 self.ruleb[(LL1, LL0)] = (RR1, RR0, rbnd)
         else:
-            if (LL0, LL1) in self.ruleu:
-                raise Exception("The pattern of left hand side is duplicated: ",
-                    L0 + l0 + " " + L1 + l1)
             self.ruleu[(LL0, LL1)] = (RR0, RR1, rbnd)
             if LL0 != LL1:
                 self.ruleu[(LL1, LL0)] = (RR1, RR0, rbnd)
