@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 14:44:43 nineties $
+# $Id: hchem.py 2014-08-07 14:51:22 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -248,6 +248,7 @@ class HChem:
         self.dt = dt
         self.w = width
         self.h = height
+        self.speed = 10
 
         # Initialize positions of particles
         self.pos = np.zeros((n, 2))
@@ -258,8 +259,7 @@ class HChem:
         direction = np.random.uniform(0, 2*np.pi, n)
         self.vel = np.zeros((n, 2))
         self.vel[:,0] = v0*np.cos(direction)
-        self.vel[:,1] = v0*np.sin(direction)
-
+        self.vel[:,1] = v0*np.sin(direction) 
         # Initialize types
         self.types = np.zeros(n, dtype=int)
         for k in xrange(self.n):
@@ -393,60 +393,24 @@ class HChem:
                 self.add_impulse_between_bound_pair(k, l, rx, rv, d2)
 
     def compute_impulse(self):
+        self.init_bucket()
         self.add_impulse_from_walls()
         self.add_impulse_between_particles()
         self.add_impulse_between_bound_particles()
         self.pos += self.vel*self.dt
 
+    def change_speed(self, delta):
+        self.speed += delta;
+        if self.speed < 0:
+            self.speed = 1
+
     def update(self):
-        self.init_bucket()
         # Update position
-        self.compute_impulse()
-        #self.compute_impulse()
-        #self.compute_impulse()
-        # Fix collision of free particles
-        #self.fix_collision_with_walls()
-        #self.fix_collision_with_particles()
+        for k in range(self.speed):
+            self.compute_impulse()
 
-
-        #x = self.pos[0,0]
-        #y = self.pos[0,1]
-        #if x < self.r:
-        #    p = np.array([0, y])
-        #elif x > self.w-self.r:
-        #    p = np.array([self.w, y])
-        #elif y < self.r:
-        #    p = np.array([x, 0])
-        #elif y > self.h-self.r:
-        #    p = np.array([x, self.h])
-        #else:
-        #    return
-
-        #r = self.pos[0,:] - p
-        #ldt = - r.dot(self.vel[0,:])/np.sum(r*r) 
-        #self.vel[0,:] += ldt * 2 * r
-
-        # Symplectic Euler
-        #self.init_bucket()
-        #force = self.compute_force()
-        #self.vel += force*self.dt
-        #self.pos += self.vel*self.dt
-
-        # Leap Frog
-        #self.init_bucket()
-        #force = self.compute_force()
-        #pvel = self.pvel
-        #self.pvel = self.vel
-        #self.vel = pvel + 2*self.dt*force
-        #self.pos += 2*self.dt*self.vel
-
-        # Forward Euler
-        #self.init_bucket()
-        #force = self.compute_force()
-        #self.pos += self.vel*self.dt
-        #self.vel += force*self.dt
     def total_energy(self):
-        return np.sum(self.vel*self.vel)
+        return np.sum(self.vel*self.vel)/2
 
     def save(self, fname):
         with open(fname, "w") as f:
@@ -466,7 +430,7 @@ class HChemViewer:
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     INFO = [
-    "(P) play/pause, (F) stepwise, (Q) quit, (T) show/hide particle types",
+    "(P) play/pause, (F) stepwise, (Q) quit, (T) show/hide particle types, (up) Speed up, (down) Speed down",
     "(left drag) move particle, (right drag) bind particles, (double click) change particle type"
     ]
 
@@ -525,6 +489,10 @@ class HChemViewer:
                     sys.exit()
                 if key[pygame.K_p]:
                     self.play = not self.play
+                if key[pygame.K_UP]:
+                    self.sim.change_speed(1)
+                if key[pygame.K_DOWN]:
+                    self.sim.change_speed(-1)
                 if key[pygame.K_s]:
                     fname = tkFileDialog.asksaveasfilename()
                 #if key[pygame.K_s]:
