@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 14:51:22 nineties $
+# $Id: hchem.py 2014-08-07 15:05:05 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -69,7 +69,7 @@ class Rule:
         q = re.search(r'([a-wzA-Z]+)(\d+|[xy])', M1)
         return (p.group(1), p.group(2), q.group(1), q.group(2), bnd)
 
-    def add_rule(self, L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd):
+    def add_rule(self, L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd, prob):
         if l0 in self.wildstates and l1 in self.wildstates:
             if l0 == l1:
                 for s in range(self.state_max+1):
@@ -80,7 +80,7 @@ class Rule:
                     else:        _r0 = r0
                     if r1 == l0: _r1 = s
                     else:        _r1 = r1
-                    self.add_rule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
+                    self.add_rule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd, prob)
                 return
             else:
                 for s0 in range(self.state_max+1):
@@ -96,7 +96,7 @@ class Rule:
                         if r1 == l0:   _r1 = s0
                         elif r1 == l1: _r1 = s1
                         else:          _r1 = r1
-                        self.add_rule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
+                        self.add_rule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd, prob)
                 return
         elif l0 in self.wildstates or l1 in self.wildstates:
             if l0 in self.wildstates:
@@ -107,7 +107,7 @@ class Rule:
                     else:        _r0 = r0
                     if r1 == l0: _r1 = s
                     else:        _r1 = r1
-                    self.add_rule(L0, _l0, L1, l1, lbnd, R0, _r0, R1, _r1, rbnd)
+                    self.add_rule(L0, _l0, L1, l1, lbnd, R0, _r0, R1, _r1, rbnd, prob)
                 return
             else:
                 for s in range(self.state_max + 1):
@@ -117,20 +117,28 @@ class Rule:
                     else:        _r0 = r0
                     if r1 == L1: _r1 = s
                     else:        _r1 = r1
-                    self.add_rule(L0, l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
+                    self.add_rule(L0, l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd, prob)
                 return
         LL0 = self.to_index(L0, l0)
         LL1 = self.to_index(L1, l1)
         RR0 = self.to_index(R0, r0)
         RR1 = self.to_index(R1, r1)
         if lbnd:
-            self.ruleb[(LL0, LL1)] = (RR0, RR1, rbnd)
+            if not (LL0, LL1) in self.ruleb:
+                self.ruleb[(LL0, LL1)] = []
+                if LL0 != LL1:
+                    self.ruleb[(LL1, LL0)] = []
+            self.ruleb[(LL0, LL1)].append((RR0, RR1, rbnd, prob))
             if LL0 != LL1:
-                self.ruleb[(LL1, LL0)] = (RR1, RR0, rbnd)
+                self.ruleb[(LL1, LL0)].append((RR1, RR0, rbnd, prob))
         else:
-            self.ruleu[(LL0, LL1)] = (RR0, RR1, rbnd)
+            if not (LL0, LL1) in self.ruleu:
+                self.ruleu[(LL0, LL1)] = []
+                if LL0 != LL1:
+                    self.ruleu[(LL1, LL0)] = []
+            self.ruleu[(LL0, LL1)].append((RR0, RR1, rbnd, prob))
             if LL0 != LL1:
-                self.ruleu[(LL1, LL0)] = (RR1, RR0, rbnd)
+                self.ruleu[(LL1, LL0)].append((RR1, RR0, rbnd, prob))
 
     def parse_rule(self, line):
         try:
@@ -138,6 +146,10 @@ class Rule:
         except:
             return
         self.rule_texts.append(line)
+        prob = 1.0
+        if ":" in rhs:
+            rhs, p = rhs.split(":")
+            prob = eval(p.strip())
         L0, l0, L1, l1, lbnd = self.parse_expr(lhs.strip())
         R0, r0, R1, r1, rbnd = self.parse_expr(rhs.strip())
         if L0 in self.wildcards and L1 in self.wildcards:
@@ -149,7 +161,7 @@ class Rule:
                     else:        _R0 = R0
                     if R1 == L0: _R1 = t
                     else:        _R1 = R1
-                    self.add_rule(_L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd)
+                    self.add_rule(_L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd, prob)
             else:
                 for t0 in self.types:
                     for t1 in self.types:
@@ -162,7 +174,7 @@ class Rule:
                         if R1 == L0:   _R1 = t0
                         elif R1 == L1: _R1 = t1
                         else:          _R1 = R1
-                        self.add_rule(_L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd)
+                        self.add_rule(_L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd, prob)
         elif L0 in self.wildcards or L1 in self.wildcards:
             if L0 in self.wildcards:
                 for t in self.types:
@@ -171,7 +183,7 @@ class Rule:
                     else:        _R0 = R0
                     if R1 == L0: _R1 = t
                     else:        _R1 = R1
-                    self.add_rule(_L0, l0, L1, l1, lbnd, _R0, r0, _R1, r1, rbnd)
+                    self.add_rule(_L0, l0, L1, l1, lbnd, _R0, r0, _R1, r1, rbnd, prob)
             else:
                 for t in self.types:
                     _L1 = t
@@ -179,9 +191,9 @@ class Rule:
                     else:        _R0 = R0
                     if R1 == L1: _R1 = t
                     else:        _R1 = R1
-                    self.add_rule(L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd)
+                    self.add_rule(L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd, prob)
         else:
-            self.add_rule(L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd)
+            self.add_rule(L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd, prob)
 
     def add_type(self, t):
         self.types.append(t)
@@ -313,25 +325,33 @@ class HChem:
     def update_state_of_particle_pair(self, k, l):
         if l in self.bonds[k]:
             # bound pair
-            r = self.rule.check(self.types[k], self.types[l], True)
-            if r:
-                self.types[k] = r[0]
-                self.types[l] = r[1]
-                if not r[2]:
-                    self.bonds[k].remove(l)
-                    self.bonds[l].remove(k)
-                    return False
+            rules = self.rule.check(self.types[k], self.types[l], True)
+            if rules:
+                for r in rules:
+                    p = r[3]
+                    if np.random.uniform(0, 1) < p:
+                        self.types[k] = r[0]
+                        self.types[l] = r[1]
+                        if not r[2]:
+                            self.bonds[k].remove(l)
+                            self.bonds[l].remove(k)
+                            return False
+                        return True
             return True
         else:
             # unbound pair
-            r = self.rule.check(self.types[k], self.types[l], False)
-            if r:
-                self.types[k] = r[0]
-                self.types[l] = r[1]
-                if r[2]:
-                    self.bonds[k].append(l)
-                    self.bonds[l].append(k)
-                    return True
+            rules = self.rule.check(self.types[k], self.types[l], False)
+            if rules:
+                for r in rules:
+                    p = r[3]
+                    if np.random.uniform(0, 1) < p:
+                        self.types[k] = r[0]
+                        self.types[l] = r[1]
+                        if r[2]:
+                            self.bonds[k].append(l)
+                            self.bonds[l].append(k)
+                            return True
+                        return False
             return False
 
     def add_impulse_between_unbound_pair(self, k, l, rx, rv, d2):
@@ -481,6 +501,22 @@ class HChemViewer:
         dialog.mainloop()
         return type.get()
 
+    def ask_file(self, title):
+        dialog = tk.Tk()
+        dialog.title(title)
+        filename = tk.StringVar(dialog)
+        savetype = tk.StringVar(dialog)
+        savetype.set("particles")
+        tk.Radiobutton(dialog, text="Particles", variable=savetype, value="particles").pack(anchor = tk.W)
+        tk.Radiobutton(dialog, text="Rules", variable=savetype, value="rules").pack(anchor = tk.W)
+        tk.Label(dialog, text = "filename").pack(side=tk.LEFT)
+        entry = tk.Entry(dialog, textvariable=filename)
+        entry.focus_force()
+        entry.pack(side=tk.LEFT)
+        entry.bind('<Return>', lambda evt: dialog.destroy())
+        dialog.mainloop()
+        return filename.get(), savetype.get()
+
     def check_event(self):
         for event in pygame.event.get():
             if not self.dragged and event.type == pygame.KEYDOWN:
@@ -494,25 +530,16 @@ class HChemViewer:
                 if key[pygame.K_DOWN]:
                     self.sim.change_speed(-1)
                 if key[pygame.K_s]:
-                    fname = tkFileDialog.asksaveasfilename()
-                #if key[pygame.K_s]:
-                #    fname = self.ask_file()
-                #    if fname: self.sim.save(fname)
-                #if key[pygame.K_l]:
-                #    fname = self.ask_file()
-                #    if fname: self.sim = HChem.load(fname)
+                    fname, type = self.ask_file("Save configuration")
+                    if fname: self.sim.save(fname, type)
+                if key[pygame.K_l]:
+                    fname, type = self.ask_file("Load configuration")
+                    if fname: self.sim.load(fname, type)
                 if key[pygame.K_t]:
                     self.display_types = not self.display_types
                 if key[pygame.K_f]:
                     self.stepwise = True
                     self.play = True
-                #if key[pygame.K_r]:
-                #    fname = self.ask_file()
-                #    self.sim.load_rule(fname)
-                #    info_texts = self.INFO + sim.rule.rule_texts
-                #    self.info = map(lambda text: self.font.render(text, False,
-                #        self.BLUE), info_texts)
-                #    self.play = False
             elif not self.dragged and event.type == pygame.MOUSEBUTTONDOWN:
                 self.play = False
                 clicked = self.get_clicked()
