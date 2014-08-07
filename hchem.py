@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 15:05:05 nineties $
+# $Id: hchem.py 2014-08-07 15:09:11 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -113,9 +113,9 @@ class Rule:
                 for s in range(self.state_max + 1):
                     s = str(s)
                     _l1 = s
-                    if r0 == L1: _r0 = s
+                    if r0 == l1: _r0 = s
                     else:        _r0 = r0
-                    if r1 == L1: _r1 = s
+                    if r1 == l1: _r1 = s
                     else:        _r1 = r1
                     self.add_rule(L0, l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd, prob)
                 return
