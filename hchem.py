@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 17:24:13 nineties $
+# $Id: hchem.py 2014-08-07 17:29:14 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -334,7 +334,16 @@ class HChem:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
                         print "apply:",
-                        print r
+                        print self.rule.get_name(self.types[k]),
+                        print "-",
+                        print self.rule.get_name(self.types[l]),
+                        print " -> ",
+                        print self.rule.get_name(r[0]),
+                        if r[2]:
+                            print "-",
+                        else:
+                            print " ",
+                        print self.rule.get_name(r[1])
                         self.types[k] = r[0]
                         self.types[l] = r[1]
                         if not r[2]:
@@ -351,7 +360,16 @@ class HChem:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
                         print "apply:",
-                        print r
+                        print self.rule.get_name(self.types[k]),
+                        print " ",
+                        print self.rule.get_name(self.types[l]),
+                        print " -> ",
+                        print self.rule.get_name(r[0]),
+                        if r[2]:
+                            print "-",
+                        else:
+                            print " ",
+                        print self.rule.get_name(r[1])
                         self.types[k] = r[0]
                         self.types[l] = r[1]
                         if r[2]:
