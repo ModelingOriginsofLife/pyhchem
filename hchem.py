@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 19:16:32 nineties $
+# $Id: hchem.py 2014-08-07 19:51:32 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -510,6 +510,7 @@ class HChem:
             sim.vel = np.array(vel)
             sim.stypes = np.array(types)
             sim.types = np.array(map(lambda t: sim.rule.get_index(t), sim.stypes))
+            self.name = map(lambda k: sim.rule.get_name(k), sim.types)
             sim.bonds = bonds
 
     def load(self, fname, type):
