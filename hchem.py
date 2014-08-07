@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 15:59:13 nineties $
+# $Id: hchem.py 2014-08-07 17:24:13 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -10,7 +10,7 @@ import re, sys, time, math
 import Tkinter as tk
 import tkFileDialog
 
-class Rule:
+class HChemRule:
     def __init__(self, filename):
         self.cnt = 0
         self.num = None
@@ -249,7 +249,7 @@ class HChem:
     # seed: random seed
     def __init__(self, filename, n = 1000, r = 10, v0 = None, dt = 0.1,
                  width = 1200, height = 700, bucket_size = None, seed=None):
-        self.rule = Rule(filename)
+        self.rule = HChemRule(filename)
         if seed: np.random.seed(seed)
         if v0 == None: v0 = r
         if bucket_size == None: bucket_size = 2*r
@@ -282,6 +282,9 @@ class HChem:
                 if p < q:
                     self.types[k] = self.rule.get_index(t)
                     break
+        self.stypes = np.zeros(n, dtype=object)
+        for k in xrange(self.n):
+            self.stypes[k] = self.rule.get_name(self.types[k])
 
         # self.bonds[i] == list of indexes of particles which is bound to i.
         self.bonds = np.zeros(n, dtype=object)
@@ -294,7 +297,7 @@ class HChem:
         self.buckets = np.zeros((self.nbx, self.nby), dtype=object)
 
     def load_rule(self, fname):
-        self.rule = Rule(fname)
+        self.rule = HChemRule(fname)
 
     def bucket_index(self, x):
         return (min(max(int(x[0]/self.bucket_size), 0), self.nbx-1),
@@ -330,6 +333,8 @@ class HChem:
                 for r in rules:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
+                        print "apply:",
+                        print r
                         self.types[k] = r[0]
                         self.types[l] = r[1]
                         if not r[2]:
@@ -345,6 +350,8 @@ class HChem:
                 for r in rules:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
+                        print "apply:",
+                        print r
                         self.types[k] = r[0]
                         self.types[l] = r[1]
                         if r[2]:
@@ -432,9 +439,25 @@ class HChem:
     def total_energy(self):
         return np.sum(self.vel*self.vel)/2
 
-    def save(self, fname):
-        with open(fname, "w") as f:
-            pickle.dump(self, f)
+    def save(self, fname, type):
+        if type == "particles":
+            self.save_particles(fname)
+        else:
+            self.save_rules(fname)
+
+    def save_particles(self, fname):
+        try:
+            with open(fname, "w") as f:
+                f.write(repr(self.n)); f.write("\n")
+                f.write(repr(self.dt)); f.write("\n")
+                for k in xrange(self.n):
+                    f.write(self.pos[k,0]); f.write(",")
+                    f.write(self.pos[k,1]); f.write(",")
+                    f.write(self.vel[k,0]); f.write(",")
+                    f.write(self.vel[k,1]); f.write(",")
+                    f.write(self.stypes[k]); f.write("\n")
+        except:
+            pass
 
     @classmethod
     def load(self, fname):
@@ -493,6 +516,7 @@ class HChemViewer:
     def ask_particle(self):
         i = self.get_clicked()
         dialog = tk.Tk()
+        dialog.title("Enter particle type and state")
         type = tk.StringVar(dialog)
         tk.Label(dialog, text = "type").pack(side=tk.LEFT)
         entry = tk.Entry(dialog, textvariable=type)
