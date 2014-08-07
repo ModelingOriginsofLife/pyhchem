@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 15:21:08 nineties $
+# $Id: hchem.py 2014-08-07 15:26:34 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -476,8 +476,8 @@ class HChemViewer:
         self.play          = False
         self.stepwise      = False
         self.dragged       = None
-        self.move          = False
-        self.bound         = False
+        self.moving          = False
+        self.binding         = False
         self.display_types = False
         self.prev_lclick   = time.time()
 
@@ -560,21 +560,25 @@ class HChemViewer:
                         pass
                 elif clicked:
                     self.dragged = clicked
-                    if l: self.move = True
-                    elif r: self.bound = True
+                    if l: self.moving = True
+                    elif r: self.binding = True
             elif self.dragged and event.type == pygame.MOUSEMOTION:
                 l,m,r = pygame.mouse.get_pressed()
                 if l:
                     self.sim.pos[self.dragged,:] = pygame.mouse.get_pos()
             elif self.dragged and event.type == pygame.MOUSEBUTTONUP:
-                if self.bound:
+                if self.binding:
                      clicked = self.get_clicked()
                      if clicked and self.dragged != clicked and\
                              not (clicked in self.sim.bonds[self.dragged]):
                          self.sim.bonds[self.dragged].append(clicked)
                          self.sim.bonds[clicked].append(self.dragged)
-                self.move    = False
-                self.bound   = False
+                     elif clicked and self.dragged != clicked and\
+                             (clicked in self.sim.bonds[self.dragged]):
+                         self.sim.bonds[self.dragged].remove(clicked)
+                         self.sim.bonds[clicked].remove(self.dragged)
+                self.moving    = False
+                self.binding   = False
                 self.dragged = None
             elif event.type == pygame.QUIT:
                 sys.exit()
@@ -618,7 +622,7 @@ class HChemViewer:
                     pygame.draw.line(screen, self.BLACK, pos[k,:], pos[l,:])
 
             # Other info
-            if self.bound:
+            if self.binding:
                 pygame.draw.line(screen, self.BLACK,
                     pos[self.dragged,:], pygame.mouse.get_pos())
 
