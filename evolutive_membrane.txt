@@ -1,14 +1,15 @@
-type: a, b, g, w
+type: A, B, G, W
 
 # Initial condition
-number of particles: 100
-fill: a0 0.39, b0 0.10, g0 0.01, w0 0.50
+number of particles: 200
+state max: 100
+fill: A0 0.19, B0 0.10, G0 0.01, W0 0.70
 
 # Rules
-a0 a0 -> a1-a1
-a0 a1 -> a1-a2
-a1 a1 -> a2-a2
-b0 a2 -> b0 a3
-a3-a3 -> a1 a1
-g0 a3 -> g0 a2
-w0 w0 -> w0 w0
+A0 A0 -> A1-A1
+A0 A1 -> A1-A2
+A1 A1 -> A2-A2
+B0 A2 -> B0 A3
+A3-A3 -> A1 A1
+G0 A3 -> G0 A2
+W0 W0 -> W0 W0

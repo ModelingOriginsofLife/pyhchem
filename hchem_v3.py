@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: pyhchem_v3.py 2014-08-05 17:16:08 nineties $
+# $Id: pyhchem_v3.py 2014-08-07 08:55:27 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -11,12 +11,10 @@ import pygame
 import math, re, time, sys, os
 
 class HChemSimulator:
-    def __init__(self, n, types, init, rules, wildcards = [],
+    def __init__(self, n, types, init, rules, state_max,
             width = 1300, height = 650, radious = 10, v0 = 10, dt = 0.3):
-        self.gen       = 0
         self.n         = n
         self.types     = types
-        self.wildcards = wildcards
         self.init      = init
         self.rules     = rules
         self.ruleu     = {} # rules for unbound pair
@@ -28,12 +26,10 @@ class HChemSimulator:
         self.v0        = v0
         self.dt        = dt
         self.setup_particles()
-        # Warnup
+        # Warmup
         for k in range(5):
             self.update()
         self.setup_rules()
-        print "Start"
-        print time.time()
 
     # Convert "a0" to "a" and 0
     def parse_type(self, t):
@@ -263,10 +259,6 @@ class HChemSimulator:
         self.pos += self.vel*self.dt
 
     def update(self):
-        self.gen += 1
-        if self.gen == 1000:
-            print "Finished"
-            print time.time()
         self.compute_impulse()
         self.compute_impulse()
         self.compute_impulse()

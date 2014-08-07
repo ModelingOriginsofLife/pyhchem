@@ -1,18 +1,14 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-06 15:57:44 nineties $
+# $Id: hchem.py 2014-08-07 10:11:14 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
 import numpy as np
 import numpy.linalg as la
-import pygame, inputbox, pickle
+import pygame, pickle
 import re, sys, time, math
-
-def ask(screen, msg):
-    print msg
-    print ">", 
-    line = sys.stdin.readline().strip()
-    return line
+import Tkinter as tk
+import tkFileDialog
 
 class Rule:
     def __init__(self, filename):
@@ -24,7 +20,9 @@ class Rule:
         self.color_count = 0
         self.colors = []
         self.colormap = {}
-        self.wildcards = []
+        self.wildcards = ['X', 'Y']
+        self.wildstates = ['x', 'y']
+        self.state_max = 10
         self.name = []
         self.ruleb = {} # Rules for bounded pair
         self.ruleu = {} # Rules for unbounded pair
@@ -135,6 +133,46 @@ class Rule:
                     if R1 == L1: _R1 = t
                     else:        _R1 = R1
                     self.add_rule(L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd)
+        elif l0 in self.wildstates and l1 in self.wildstates:
+            if l0 == l1:
+                for s in range(self.state_max+1):
+                    _l0 = s
+                    _l1 = s
+                    if r0 == l0: _r0 = s
+                    else:        _r0 = r0
+                    if r1 == l0: _r1 = s
+                    else:        _r1 = r1
+                    self.add_rule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
+            else:
+                for s0 in range(self.state_max+1):
+                    for s1 in range(self.state_max+1):
+                        if l0 == l1 and s0 > s1: continue
+                        _l0 = s0
+                        _l1 = s1
+                        if r0 == l0:   _r0 = s0
+                        elif r0 == l1: _r0 = s1
+                        else:          _r0 = r0
+                        if r1 == l0:   _r1 = s0
+                        elif r1 == l1: _r1 = s1
+                        else:          _r1 = r1
+                        self.addRule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
+        elif l0 in self.wildstates or l1 in self.wildstates:
+            if l0 in self.wildstates:
+                for s in range(self.state_max + 1):
+                    _l0 = s
+                    if r0 == l0: _r0 = s
+                    else:        _r0 = r0
+                    if r1 == l0: _r1 = s
+                    else:        _r1 = r1
+                    self.add_rule(L0, _l0, L1, l1, lbnd, R0, _r0, R1, _r1, rbnd)
+            else:
+                for s in range(self.state_max + 1):
+                    _l1 = s
+                    if r0 == L1: _r0 = s
+                    else:        _r0 = r0
+                    if r1 == L1: _r1 = s
+                    else:        _r1 = r1
+                    self.add_rule(L0, l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
         else:
             self.add_rule(L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd)
 
@@ -146,11 +184,6 @@ class Rule:
         lhs, rhs = str.split(":")
         for t in rhs.split(","):
             self.add_type(t.strip())
-
-    def setup_wildcards(self, str):
-        lhs, rhs = str.split(":")
-        for w in rhs.split(","):
-            self.wildcards.append(w.strip())
 
     def setup_fill(self, str):
         lhs, rhs = str.split(":")
@@ -167,10 +200,10 @@ class Rule:
             line = line.strip()
             if line.find("type") == 0:
                 self.setup_types(line)
-            elif line.find("wildcard") == 0:
-                self.setup_wildcards(line)
             elif line.find("number of particles") == 0:
                 self.num = int(line.split(":")[1].strip())
+            elif line.find("state max") == 0:
+                self.state_max = int(line.split(":")[1].strip())
             elif line.find("fill") == 0:
                 self.setup_fill(line)
             elif "->" in line:
@@ -362,8 +395,8 @@ class HChem:
         self.init_bucket()
         # Update position
         self.compute_impulse()
-        self.compute_impulse()
-        self.compute_impulse()
+        #self.compute_impulse()
+        #self.compute_impulse()
         # Fix collision of free particles
         #self.fix_collision_with_walls()
         #self.fix_collision_with_particles()
@@ -426,7 +459,7 @@ class HChemViewer:
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     INFO = [
-    "(P) play/pause, (F) stepwise, (Q) quit, (S) save snapshot, (L) load snapshot, (R) load rule, (T) show/hide particle types, (up) speed up, (down) slow down",
+    "(P) play/pause, (F) stepwise, (Q) quit, (T) show/hide particle types",
     "(left drag) move particle, (right drag) bind particles, (double click) change particle type"
     ]
 
@@ -465,6 +498,18 @@ class HChemViewer:
                 break
         return None
 
+    def ask_particle(self):
+        i = self.get_clicked()
+        dialog = tk.Tk()
+        type = tk.StringVar(dialog, sim.rule.get_name(sim.types[i]))
+        tk.Label(dialog, text = "type").pack(side=tk.LEFT)
+        entry = tk.Entry(dialog, textvariable=type)
+        entry.focus_force()
+        entry.pack(side=tk.LEFT)
+        entry.bind('<Return>', lambda evt: dialog.destroy())
+        dialog.mainloop()
+        return type.get()
+
     def check_event(self):
         for event in pygame.event.get():
             if not self.dragged and event.type == pygame.KEYDOWN:
@@ -473,24 +518,24 @@ class HChemViewer:
                     sys.exit()
                 if key[pygame.K_p]:
                     self.play = not self.play
-                if key[pygame.K_s]:
-                    fname = ask(self.screen, "filename")
-                    if fname: self.sim.save(fname)
-                if key[pygame.K_l]:
-                    fname = ask(self.screen, "filename")
-                    if fname: self.sim = HChem.load(fname)
+                #if key[pygame.K_s]:
+                #    fname = self.ask_file()
+                #    if fname: self.sim.save(fname)
+                #if key[pygame.K_l]:
+                #    fname = self.ask_file()
+                #    if fname: self.sim = HChem.load(fname)
                 if key[pygame.K_t]:
                     self.display_types = not self.display_types
                 if key[pygame.K_f]:
                     self.stepwise = True
                     self.play = True
-                if key[pygame.K_r]:
-                    fname = ask(self.screen, "filename")
-                    self.sim.load_rule(fname)
-                    info_texts = self.INFO + sim.rule.rule_texts
-                    self.info = map(lambda text: self.font.render(text, False,
-                        self.BLUE), info_texts)
-                    self.play = False
+                #if key[pygame.K_r]:
+                #    fname = self.ask_file()
+                #    self.sim.load_rule(fname)
+                #    info_texts = self.INFO + sim.rule.rule_texts
+                #    self.info = map(lambda text: self.font.render(text, False,
+                #        self.BLUE), info_texts)
+                #    self.play = False
             elif not self.dragged and event.type == pygame.MOUSEBUTTONDOWN:
                 self.play = False
                 clicked = self.get_clicked()
@@ -503,8 +548,8 @@ class HChemViewer:
                     double_click = True
                 self.prev_lclick = t
 
-                if double_click:
-                    t = ask(self.screen, "type")
+                if clicked and double_click:
+                    t = self.ask_particle()
                     try:
                         self.sim.types[clicked] = self.sim.rule.get_index(t)
                     except:
@@ -593,5 +638,5 @@ if __name__ == '__main__':
     if len(sys.argv) >= 2:
         sim = HChem(sys.argv[1])
     else:
-        sim = HChem("evolutive_membrane.txt", n=100)
+        sim = HChem("evolutive_membrane.txt")
     HChemViewer(sim).loop()
