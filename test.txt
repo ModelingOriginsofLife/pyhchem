@@ -6,4 +6,5 @@ state max: 100
 fill: A0 0.2, A1 0.2, A2 0.2, A3 0.2, A4 0.2
 
 # Rules
-Ax Ax -> Ax-Ax
+X0 X0 -> X0-X0
+#Ax Ax -> Ax-Ax

@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 10:27:39 nineties $
+# $Id: hchem.py 2014-08-07 14:34:16 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -33,7 +33,11 @@ class Rule:
             (255, 127, 0), (255, 0, 127), (127, 255, 0), (127, 0, 255),
             (0, 255, 127), (0, 127, 255)
         ]
+
         self.parse(filename)
+        for t in self.types:
+            for s in range(0, self.state_max+1):
+                self.to_index(t, str(s))
 
     def gen_color(self, a):
         self.color_count += 1
@@ -41,6 +45,7 @@ class Rule:
 
     def to_index(self, t, n):
         term = t + n
+        print term
         if not term in self.map:
             self.map[term] = self.cnt
             self.colors.append(self.colormap[t])
@@ -523,6 +528,8 @@ class HChemViewer:
                     sys.exit()
                 if key[pygame.K_p]:
                     self.play = not self.play
+                if key[pygame.K_s]:
+                    fname = tkFileDialog.asksaveasfilename()
                 #if key[pygame.K_s]:
                 #    fname = self.ask_file()
                 #    if fname: self.sim.save(fname)
