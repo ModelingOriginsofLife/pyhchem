@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 15:09:11 nineties $
+# $Id: hchem.py 2014-08-07 15:21:08 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -492,7 +492,7 @@ class HChemViewer:
     def ask_particle(self):
         i = self.get_clicked()
         dialog = tk.Tk()
-        type = tk.StringVar(dialog, sim.rule.get_name(sim.types[i]))
+        type = tk.StringVar(dialog)
         tk.Label(dialog, text = "type").pack(side=tk.LEFT)
         entry = tk.Entry(dialog, textvariable=type)
         entry.focus_force()
