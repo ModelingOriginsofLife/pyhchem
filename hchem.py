@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 15:26:34 nineties $
+# $Id: hchem.py 2014-08-07 15:59:13 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -451,7 +451,7 @@ class HChemViewer:
     BLACK = (0, 0, 0)
     INFO = [
     "(P) play/pause, (F) stepwise, (Q) quit, (T) show/hide particle types, (up) Speed up, (down) Speed down",
-    "(left drag) move particle, (right drag) bind particles, (double click) change particle type"
+    "(drag) move particle, (shift + drag) bind/unbind particles, (double click) change type and state of a particle"
     ]
 
     def __init__(self, sim, w = None, h = None):
@@ -473,11 +473,12 @@ class HChemViewer:
         self.speed = 10
 
         # For events
+        self.shift         = False
         self.play          = False
         self.stepwise      = False
         self.dragged       = None
-        self.moving          = False
-        self.binding         = False
+        self.moving        = False
+        self.binding       = False
         self.display_types = False
         self.prev_lclick   = time.time()
 
@@ -519,8 +520,10 @@ class HChemViewer:
 
     def check_event(self):
         for event in pygame.event.get():
-            if not self.dragged and event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN:
                 key = pygame.key.get_pressed()
+                if key[pygame.K_RSHIFT] or key[pygame.K_LSHIFT]:
+                    self.shift = True
                 if key[pygame.K_q]:
                     sys.exit()
                 if key[pygame.K_p]:
@@ -540,15 +543,18 @@ class HChemViewer:
                 if key[pygame.K_f]:
                     self.stepwise = True
                     self.play = True
-            elif not self.dragged and event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pygame.KEYUP:
+                key = pygame.key.get_pressed()
+                if not key[pygame.K_RSHIFT] and not key[pygame.K_LSHIFT]:
+                    self.shift = False
+            if not self.dragged and event.type == pygame.MOUSEBUTTONDOWN:
                 self.play = False
                 clicked = self.get_clicked()
-                l,m,r = pygame.mouse.get_pressed()
 
                 # Detect double click
                 t = time.time()
                 double_click = False
-                if l and t - self.prev_lclick < 1.0/3:
+                if t - self.prev_lclick < 1.0/3:
                     double_click = True
                 self.prev_lclick = t
 
@@ -560,11 +566,10 @@ class HChemViewer:
                         pass
                 elif clicked:
                     self.dragged = clicked
-                    if l: self.moving = True
-                    elif r: self.binding = True
+                    if not self.shift: self.moving = True
+                    elif self.shift: self.binding = True
             elif self.dragged and event.type == pygame.MOUSEMOTION:
-                l,m,r = pygame.mouse.get_pressed()
-                if l:
+                if self.moving:
                     self.sim.pos[self.dragged,:] = pygame.mouse.get_pos()
             elif self.dragged and event.type == pygame.MOUSEBUTTONUP:
                 if self.binding:
