@@ -2,7 +2,7 @@ type: A, B
 
 # Initial condition
 number of particles: 200
-state max: 100
+state max: 4
 fill: A0 0.1, A1 0.1, A2 0.1, A3 0.1, A4 0.1, B0 0.1, B1 0.1, B2 0.1, B3 0.1, B4 0.1
 
 # Rules

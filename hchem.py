@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 17:29:14 nineties $
+# $Id: hchem.py 2014-08-07 19:16:32 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -8,7 +9,7 @@ import numpy.linalg as la
 import pygame, pickle
 import re, sys, time, math
 import Tkinter as tk
-import tkFileDialog
+import tkMessageBox
 
 class HChemRule:
     def __init__(self, filename):
@@ -51,6 +52,12 @@ class HChemRule:
             self.name.append(term)
             self.cnt += 1
         return self.map[term]
+
+    def is_valid_type(self, term):
+        if term in self.map:
+            return True
+        else:
+            return False
 
     def get_index(self, term):
         return self.map[term]
@@ -296,9 +303,6 @@ class HChem:
         self.nby = int(math.ceil(float(height)/bucket_size))
         self.buckets = np.zeros((self.nbx, self.nby), dtype=object)
 
-    def load_rule(self, fname):
-        self.rule = HChemRule(fname)
-
     def bucket_index(self, x):
         return (min(max(int(x[0]/self.bucket_size), 0), self.nbx-1),
                 min(max(int(x[1]/self.bucket_size), 0), self.nby-1))
@@ -333,17 +337,17 @@ class HChem:
                 for r in rules:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
-                        print "apply:",
-                        print self.rule.get_name(self.types[k]),
-                        print "-",
-                        print self.rule.get_name(self.types[l]),
-                        print " -> ",
-                        print self.rule.get_name(r[0]),
-                        if r[2]:
-                            print "-",
-                        else:
-                            print " ",
-                        print self.rule.get_name(r[1])
+                        # print "apply:",
+                        # print self.rule.get_name(self.types[k]),
+                        # print "-",
+                        # print self.rule.get_name(self.types[l]),
+                        # print " -> ",
+                        # print self.rule.get_name(r[0]),
+                        # if r[2]:
+                        #     print "-",
+                        # else:
+                        #     print " ",
+                        # print self.rule.get_name(r[1])
                         self.types[k] = r[0]
                         self.types[l] = r[1]
                         if not r[2]:
@@ -359,17 +363,17 @@ class HChem:
                 for r in rules:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
-                        print "apply:",
-                        print self.rule.get_name(self.types[k]),
-                        print " ",
-                        print self.rule.get_name(self.types[l]),
-                        print " -> ",
-                        print self.rule.get_name(r[0]),
-                        if r[2]:
-                            print "-",
-                        else:
-                            print " ",
-                        print self.rule.get_name(r[1])
+                        # print "apply:",
+                        # print self.rule.get_name(self.types[k]),
+                        # print " ",
+                        # print self.rule.get_name(self.types[l]),
+                        # print " -> ",
+                        # print self.rule.get_name(r[0]),
+                        # if r[2]:
+                        #     print "-",
+                        # else:
+                        #     print " ",
+                        # print self.rule.get_name(r[1])
                         self.types[k] = r[0]
                         self.types[l] = r[1]
                         if r[2]:
@@ -469,21 +473,50 @@ class HChem:
                 f.write(repr(self.n)); f.write("\n")
                 f.write(repr(self.dt)); f.write("\n")
                 for k in xrange(self.n):
-                    f.write(self.pos[k,0]); f.write(",")
-                    f.write(self.pos[k,1]); f.write(",")
-                    f.write(self.vel[k,0]); f.write(",")
-                    f.write(self.vel[k,1]); f.write(",")
-                    f.write(self.stypes[k]); f.write("\n")
+                    f.write(self.stypes[k]); f.write(",")
+                    f.write(repr(self.pos[k,0])); f.write(",")
+                    f.write(repr(self.pos[k,1])); f.write(",")
+                    f.write(repr(self.vel[k,0])); f.write(",")
+                    f.write(repr(self.vel[k,1])); f.write("\n")
+                for k in xrange(self.n):
+                    bonds = " ".join(map(str, self.bonds[k]))
+                    f.write(bonds); f.write("\n")
         except:
             pass
 
-    @classmethod
-    def load(self, fname):
-        try:
-            with open(fname, "r") as f:
-                return pickle.load(f)
-        except:
-            pass
+    def load_particles(self, fname):
+        with open(fname, "r") as f:
+            n     = int(f.readline())
+            dt    = float(f.readline())
+            pos   = []
+            vel   = []
+            types = []
+            bonds = []
+            for k in xrange(n):
+                t, p0, p1, v0, v1 = f.readline().strip().split(",")
+                pos.append((float(p0), float(p1)))
+                vel.append((float(v0), float(v1)))
+                if not self.rule.is_valid_type(t):
+                    root = tk.Tk()
+                    root.withdraw()
+                    tkMessageBox.showerror('Error', 'Unknown type:' + t)
+                    return
+                types.append(t)
+            for k in xrange(n):
+                bonds.append(map(int, f.readline().strip().split()))
+            sim.n = n
+            sim.dt = dt
+            sim.pos = np.array(pos)
+            sim.vel = np.array(vel)
+            sim.stypes = np.array(types)
+            sim.types = np.array(map(lambda t: sim.rule.get_index(t), sim.stypes))
+            sim.bonds = bonds
+
+    def load(self, fname, type):
+        if type == "particles":
+            self.load_particles(fname)
+        else:
+            self.load_rules(fname)
 
 class HChemViewer:
     RED   = (255, 0, 0)
