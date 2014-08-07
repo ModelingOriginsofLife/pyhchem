@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 14:41:40 nineties $
+# $Id: hchem.py 2014-08-07 14:43:07 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -96,7 +96,7 @@ class Rule:
                         if r1 == l0:   _r1 = s0
                         elif r1 == l1: _r1 = s1
                         else:          _r1 = r1
-                        self.addRule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
+                        self.add_rule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
                 return
         elif l0 in self.wildstates or l1 in self.wildstates:
             if l0 in self.wildstates:
