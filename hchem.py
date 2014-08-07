@@ -1,5 +1,5 @@
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 14:34:16 nineties $
+# $Id: hchem.py 2014-08-07 14:41:40 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -45,7 +45,6 @@ class Rule:
 
     def to_index(self, t, n):
         term = t + n
-        print term
         if not term in self.map:
             self.map[term] = self.cnt
             self.colors.append(self.colormap[t])
@@ -71,6 +70,55 @@ class Rule:
         return (p.group(1), p.group(2), q.group(1), q.group(2), bnd)
 
     def add_rule(self, L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd):
+        if l0 in self.wildstates and l1 in self.wildstates:
+            if l0 == l1:
+                for s in range(self.state_max+1):
+                    s = str(s)
+                    _l0 = s
+                    _l1 = s
+                    if r0 == l0: _r0 = s
+                    else:        _r0 = r0
+                    if r1 == l0: _r1 = s
+                    else:        _r1 = r1
+                    self.add_rule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
+                return
+            else:
+                for s0 in range(self.state_max+1):
+                    for s1 in range(self.state_max+1):
+                        if l0 == l1 and s0 > s1: continue
+                        s0 = str(s0)
+                        s1 = str(s1)
+                        _l0 = s0
+                        _l1 = s1
+                        if r0 == l0:   _r0 = s0
+                        elif r0 == l1: _r0 = s1
+                        else:          _r0 = r0
+                        if r1 == l0:   _r1 = s0
+                        elif r1 == l1: _r1 = s1
+                        else:          _r1 = r1
+                        self.addRule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
+                return
+        elif l0 in self.wildstates or l1 in self.wildstates:
+            if l0 in self.wildstates:
+                for s in range(self.state_max + 1):
+                    s = str(s)
+                    _l0 = s
+                    if r0 == l0: _r0 = s
+                    else:        _r0 = r0
+                    if r1 == l0: _r1 = s
+                    else:        _r1 = r1
+                    self.add_rule(L0, _l0, L1, l1, lbnd, R0, _r0, R1, _r1, rbnd)
+                return
+            else:
+                for s in range(self.state_max + 1):
+                    s = str(s)
+                    _l1 = s
+                    if r0 == L1: _r0 = s
+                    else:        _r0 = r0
+                    if r1 == L1: _r1 = s
+                    else:        _r1 = r1
+                    self.add_rule(L0, l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
+                return
         LL0 = self.to_index(L0, l0)
         LL1 = self.to_index(L1, l1)
         RR0 = self.to_index(R0, r0)
@@ -138,51 +186,6 @@ class Rule:
                     if R1 == L1: _R1 = t
                     else:        _R1 = R1
                     self.add_rule(L0, l0, _L1, l1, lbnd, _R0, r0, _R1, r1, rbnd)
-        elif l0 in self.wildstates and l1 in self.wildstates:
-            if l0 == l1:
-                for s in range(self.state_max+1):
-                    s = str(s)
-                    _l0 = s
-                    _l1 = s
-                    if r0 == l0: _r0 = s
-                    else:        _r0 = r0
-                    if r1 == l0: _r1 = s
-                    else:        _r1 = r1
-                    self.add_rule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
-            else:
-                for s0 in range(self.state_max+1):
-                    for s1 in range(self.state_max+1):
-                        if l0 == l1 and s0 > s1: continue
-                        s0 = str(s0)
-                        s1 = str(s1)
-                        _l0 = s0
-                        _l1 = s1
-                        if r0 == l0:   _r0 = s0
-                        elif r0 == l1: _r0 = s1
-                        else:          _r0 = r0
-                        if r1 == l0:   _r1 = s0
-                        elif r1 == l1: _r1 = s1
-                        else:          _r1 = r1
-                        self.addRule(L0, _l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
-        elif l0 in self.wildstates or l1 in self.wildstates:
-            if l0 in self.wildstates:
-                for s in range(self.state_max + 1):
-                    s = str(s)
-                    _l0 = s
-                    if r0 == l0: _r0 = s
-                    else:        _r0 = r0
-                    if r1 == l0: _r1 = s
-                    else:        _r1 = r1
-                    self.add_rule(L0, _l0, L1, l1, lbnd, R0, _r0, R1, _r1, rbnd)
-            else:
-                for s in range(self.state_max + 1):
-                    s = str(s)
-                    _l1 = s
-                    if r0 == L1: _r0 = s
-                    else:        _r0 = r0
-                    if r1 == L1: _r1 = s
-                    else:        _r1 = r1
-                    self.add_rule(L0, l0, L1, _l1, lbnd, R0, _r0, R1, _r1, rbnd)
         else:
             self.add_rule(L0, l0, L1, l1, lbnd, R0, r0, R1, r1, rbnd)
 
