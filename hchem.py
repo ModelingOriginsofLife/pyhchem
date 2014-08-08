@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-08 11:24:27 nineties $
+# $Id: hchem.py 2014-08-08 11:34:03 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -481,8 +481,10 @@ class HChem:
                 for k in xrange(self.n):
                     bonds = " ".join(map(str, self.bonds[k]))
                     f.write(bonds); f.write("\n")
-        except:
-            pass
+        except Exception(e):
+            root = tk.Tk()
+            root.withdraw()
+            tkMessageBox.showerror('Error', str(e))
 
     def load_particles(self, fname):
         try:
@@ -642,6 +644,7 @@ class HChemViewer:
                 if clicked and double_click:
                     t = self.ask_particle()
                     try:
+                        self.sim.stypes[clicked] = t
                         self.sim.types[clicked] = self.sim.rule.get_index(t)
                     except:
                         pass
@@ -732,5 +735,5 @@ if __name__ == '__main__':
     if len(sys.argv) >= 2:
         sim = HChem(sys.argv[1])
     else:
-        sim = HChem("test.txt")
+        sim = HChem("models/binding_enzyme.txt")
     HChemViewer(sim).loop()
