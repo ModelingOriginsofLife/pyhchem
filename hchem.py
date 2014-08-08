@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-07 20:12:44 nineties $
+# $Id: hchem.py 2014-08-08 11:24:27 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
@@ -485,33 +485,38 @@ class HChem:
             pass
 
     def load_particles(self, fname):
-        with open(fname, "r") as f:
-            n     = int(f.readline())
-            dt    = float(f.readline())
-            pos   = []
-            vel   = []
-            types = []
-            bonds = []
-            for k in xrange(n):
-                t, p0, p1, v0, v1 = f.readline().strip().split(",")
-                pos.append((float(p0), float(p1)))
-                vel.append((float(v0), float(v1)))
-                if not self.rule.is_valid_type(t):
-                    root = tk.Tk()
-                    root.withdraw()
-                    tkMessageBox.showerror('Error', 'Unknown type:' + t)
-                    return
-                types.append(t)
-            for k in xrange(n):
-                bonds.append(map(int, f.readline().strip().split()))
-            self.n = n
-            self.dt = dt
-            self.pos = np.array(pos)
-            self.vel = np.array(vel)
-            self.stypes = np.array(types)
-            self.types = np.array(map(lambda t: self.rule.get_index(t), self.stypes))
-            self.name = types
-            self.bonds = bonds
+        try:
+            with open(fname, "r") as f:
+                n     = int(f.readline())
+                dt    = float(f.readline())
+                pos   = []
+                vel   = []
+                types = []
+                bonds = []
+                for k in xrange(n):
+                    t, p0, p1, v0, v1 = f.readline().strip().split(",")
+                    pos.append((float(p0), float(p1)))
+                    vel.append((float(v0), float(v1)))
+                    if not self.rule.is_valid_type(t):
+                        root = tk.Tk()
+                        root.withdraw()
+                        tkMessageBox.showerror('Error', 'Unknown type:' + t)
+                        return
+                    types.append(t)
+                for k in xrange(n):
+                    bonds.append(map(int, f.readline().strip().split()))
+                self.n = n
+                self.dt = dt
+                self.pos = np.array(pos)
+                self.vel = np.array(vel)
+                self.stypes = np.array(types, dtype=object)
+                self.types = np.array(map(lambda t: self.rule.get_index(t), types), dtype=int)
+                self.bonds = bonds
+
+        except Exception(e):
+            root = tk.Tk()
+            root.withdraw()
+            tkMessageBox.showerror('Error', str(e))
 
     def load(self, fname, type):
         if type == "particles":
