@@ -752,5 +752,5 @@ if __name__ == '__main__':
     if len(sys.argv) >= 2:
         sim = HChem(sys.argv[1])
     else:
-        sim = HChem("models/binding_enzyme.txt")
+        sim = HChem("models/universal_enzyme.txt")
     HChemViewer(sim).loop()
