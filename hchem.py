@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2014 nineties
-# $Id: hchem.py 2014-08-08 11:34:03 nineties $
+# $Id: hchem.py 2014-08-12 10:47:50 nineties $
 
 #= A clone of Tim Hutton's artificial chemistry simulator. =
 
 import numpy as np
 import numpy.linalg as la
 import pygame, pickle
-import re, sys, time, math
+import re, sys, os, time, math, datetime
 import Tkinter as tk
 import tkMessageBox
 
@@ -526,14 +526,24 @@ class HChem:
         else:
             self.load_rules(fname)
 
+    def start_record(self):
+        date = datetime.date.today()
+        now  = time.time()
+        dirname = str(date) + str(now)
+        os.mkdir(dirname)
+        self.record_dir = dirname
+
+    def record(self, iteration):
+        self.save_particles("%s/iteration-%d.dat" % (self.record_dir, iteration))
+
 class HChemViewer:
     RED   = (255, 0, 0)
     BLUE  = (0, 0, 255)
     WHITE = (255, 255, 255)
     BLACK = (0, 0, 0)
     INFO = [
-    "(P) play/pause, (F) stepwise, (Q) quit, (T) show/hide particle types, (up) Speed up, (down) Speed down",
-    "(drag) move particle, (shift + drag) bind/unbind particles, (double click) change type and state of a particle"
+        "(P) play/pause, (F) stepwise, (R) record, (Q) quit, (T) show/hide particle types, (up) Speed up, (down) Speed down",
+        "(drag) move particle, (shift + drag) bind/unbind particles, (double click) change type and state of a particle"
     ]
 
     def __init__(self, sim, w = None, h = None):
@@ -555,6 +565,7 @@ class HChemViewer:
         self.speed = 10
 
         # For events
+        self.record        = False
         self.shift         = False
         self.play          = False
         self.stepwise      = False
@@ -607,6 +618,10 @@ class HChemViewer:
                 key = pygame.key.get_pressed()
                 if key[pygame.K_RSHIFT] or key[pygame.K_LSHIFT]:
                     self.shift = True
+                if key[pygame.K_r]:
+                    self.record = not self.record
+                    if self.record:
+                        self.sim.start_record()
                 if key[pygame.K_q]:
                     sys.exit()
                 if key[pygame.K_p]:
@@ -682,6 +697,8 @@ class HChemViewer:
             if self.play:
                 iteration += 1
                 sim.update()
+                if self.record:
+                    sim.record(iteration)
 
             if self.stepwise:
                 self.play = False
