@@ -2,4 +2,4 @@
 
 Requires: numpy, pygame.
 
-Use 'L' to load rules files (.txt files in models folder) or configurations (.dat files in configurations folder).
+Use 'L' to load rules (.txt files in models folder) or particles (.dat files in configurations folder).
