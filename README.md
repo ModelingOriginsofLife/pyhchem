@@ -2,4 +2,7 @@
 
 Requires: numpy, pygame.
 
-Use 'L' to load rules (.txt files in models folder) or particles (.dat files in configurations folder).
+Commands:
+  * 'L' to load rules (.txt files in models folder) or particles (.dat files in configurations folder).
+  * 'S' to save rules or particles.
+  * 'Q' to quit.
