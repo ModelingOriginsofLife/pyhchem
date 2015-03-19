@@ -1,0 +1,36 @@
+# Tim trying to fix up Matteo's runner-driven binding enzyme
+# special states: 0,1,...19 
+# ordinary states: 20, 21, ...
+type: A, B
+# Initial condition
+number of particles: 110
+state max: 100
+fill: A20 0.5, A21 0.5
+
+# enzyme has form: B1 - B0 - Bi - Bp - B2 - Bq - Bj - B0 - B1
+# which will catalyse Ai + Aj -> Ap-Aq
+
+# e.g. B1 - B0 - B20 - B21 - B2 - B22 - B21 - B0 - B1 which should catalyse A20 + A21 -> A22-A23
+
+# Rules
+Ax Bx -> Ax-B3
+Ax-B3 -> Ax Bx
+B3-B0 -> B4-B5
+B4-Ax -> Bx-A7
+# problem 1: can bond on either side. have added two 'A19' atoms at the back but this is really horrid
+# now B5 is a runner, moves randomly until reaches the B2 stopper (we want this to happen quickly)
+B2-B5 -> B2-B6
+B5-Bx -> Bx-B5
+# problem 2: these reactions are checked in order. have put the stopper reaction before the runner reaction but this is horrid
+A7 A7 -> A8-A8
+A8-Bx -> Ax-B9
+B9-B6 -> B10-B11
+B10-Ax -> Bx Ax
+# now the reaction product is released and we can reset
+# B11 is now a runner, moves randomly until reaches the B1 stopper
+B11-B2 -> B11-B2
+B1-B11 -> B1-B0
+B11-Bx -> Bx-B11 : 0.05
+# problem 3: need dummy reaction to make sure the runner doesn't cross the middle
+
+# problem 4, the enzyme falls apart sometimes. needs debugging.
