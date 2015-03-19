@@ -515,7 +515,7 @@ class HChem:
                 self.types = np.array(map(lambda t: self.rule.get_index(t), types), dtype=int)
                 self.bonds = bonds
 
-        except Exception(e):
+        except Exception as e:
             root = tk.Tk()
             root.withdraw()
             tkMessageBox.showerror('Error', str(e))
@@ -555,7 +555,7 @@ class HChemViewer:
         self.screen = pygame.display.set_mode((w, h)
             #, pygame.DOUBLEBUF | pygame.FULLSCREEN | pygame.HWSURFACE
             )
-        pygame.display.set_caption("Tim Hutton's Artifical Chemistry")
+        pygame.display.set_caption("Tim Hutton's Artificial Chemistry")
         self.fontsize = 18
         self.font = pygame.font.SysFont(None, self.fontsize)
         info_texts = self.INFO + sim.rule.rule_texts
