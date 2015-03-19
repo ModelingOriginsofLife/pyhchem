@@ -481,7 +481,7 @@ class HChem:
                 for k in xrange(self.n):
                     bonds = " ".join(map(str, self.bonds[k]))
                     f.write(bonds); f.write("\n")
-        except Exception(e):
+        except Exception as e:
             root = tk.Tk()
             root.withdraw()
             tkMessageBox.showerror('Error', str(e))
@@ -569,7 +569,8 @@ class HChemViewer:
         self.shift         = False
         self.play          = False
         self.stepwise      = False
-        self.dragged       = None
+        self.dragged       = False
+        self.which_dragged = None
         self.moving        = False
         self.binding       = False
         self.display_types = False
@@ -647,7 +648,8 @@ class HChemViewer:
                     self.shift = False
             if not self.dragged and event.type == pygame.MOUSEBUTTONDOWN:
                 self.play = False
-                clicked = self.get_clicked()
+                which_clicked = self.get_clicked()
+                clicked = not (which_clicked == None)
 
                 # Detect double click
                 t = time.time()
@@ -659,31 +661,34 @@ class HChemViewer:
                 if clicked and double_click:
                     t = self.ask_particle()
                     try:
-                        self.sim.stypes[clicked] = t
-                        self.sim.types[clicked] = self.sim.rule.get_index(t)
+                        self.sim.stypes[which_clicked] = t
+                        self.sim.types[which_clicked] = self.sim.rule.get_index(t)
                     except:
                         pass
                 elif clicked:
-                    self.dragged = clicked
+                    self.dragged = True
+                    self.which_dragged = which_clicked
                     if not self.shift: self.moving = True
                     elif self.shift: self.binding = True
             elif self.dragged and event.type == pygame.MOUSEMOTION:
                 if self.moving:
-                    self.sim.pos[self.dragged,:] = pygame.mouse.get_pos()
+                    self.sim.pos[self.which_dragged,:] = pygame.mouse.get_pos()
             elif self.dragged and event.type == pygame.MOUSEBUTTONUP:
                 if self.binding:
-                     clicked = self.get_clicked()
-                     if clicked and self.dragged != clicked and\
-                             not (clicked in self.sim.bonds[self.dragged]):
-                         self.sim.bonds[self.dragged].append(clicked)
-                         self.sim.bonds[clicked].append(self.dragged)
-                     elif clicked and self.dragged != clicked and\
-                             (clicked in self.sim.bonds[self.dragged]):
-                         self.sim.bonds[self.dragged].remove(clicked)
-                         self.sim.bonds[clicked].remove(self.dragged)
-                self.moving    = False
-                self.binding   = False
-                self.dragged = None
+                     which_clicked = self.get_clicked()
+                     clicked = not (which_clicked == None)
+                     if clicked and self.which_dragged != which_clicked and\
+                             not (which_clicked in self.sim.bonds[self.which_dragged]):
+                         self.sim.bonds[self.which_dragged].append(which_clicked)
+                         self.sim.bonds[which_clicked].append(self.which_dragged)
+                     elif clicked and self.which_dragged != which_clicked and\
+                             (which_clicked in self.sim.bonds[self.which_dragged]):
+                         self.sim.bonds[self.which_dragged].remove(which_clicked)
+                         self.sim.bonds[which_clicked].remove(self.which_dragged)
+                self.moving        = False
+                self.binding       = False
+                self.dragged       = False
+                self.which_dragged = None
             elif event.type == pygame.QUIT:
                 sys.exit()
 
@@ -730,7 +735,7 @@ class HChemViewer:
             # Other info
             if self.binding:
                 pygame.draw.line(screen, self.BLACK,
-                    pos[self.dragged,:], pygame.mouse.get_pos())
+                    pos[self.which_dragged,:], pygame.mouse.get_pos())
 
             y = 10
             for i in self.info:
