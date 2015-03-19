@@ -1,8 +1,0 @@
-type: a, b, m
-number of particles: 500
-fill: m0 0.9 a0 0.05 b0 0.05
-
-m0 m0 -> m0-m0
-b0 m0 -> b0 m1
-m1-m1 -> m0 m0
-a0 m1 -> a0 m0
