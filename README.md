@@ -4,11 +4,11 @@ Requires: numpy, pygame.
 
 Usage:
 
-    python hchem <rules_filename> [optional: particles_filename]
+    python hchem.py <rules_filename> [optional: particles_filename]
   
 e.g.
 
-    python hchem models\binding_enzyme.txt configurations\binding_enzyme.dat
+    python hchem.py models\binding_enzyme.txt configurations\binding_enzyme.dat
 
 The terminal window is used for input, so keep it handy.
 
