@@ -1,0 +1,18 @@
+# Matteo's idea for safe attaching, from a Skype call 2015-03-19
+# special states alpha=20, beta=21, gamma=22, delta=23, epsilon=24, zeta=25
+
+type: A, B
+
+# Initial condition
+number of particles: 100
+state max: 100
+fill: A0 0.5, A1 0.5
+
+# start with e.g. B20-B0-B25-B25 (other things attached on the right)
+
+# Rules
+Ax Bx -> Ax-Bx
+Ax-Bx -> Ax Bx
+B20-Bx -> Bx-B21
+Bx-B21 -> B20-Bx
+Ax-B21 -> Ax-B22
