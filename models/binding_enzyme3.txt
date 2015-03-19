@@ -1,0 +1,22 @@
+# An implementation of Matteo's AB binding enzyme as discussed on 19th March 2015.
+# special states alpha=0, beta=1, gamma=2, delta=3, epsilon=4, zeta=5, eta=6, theta=7, iota=8, kappa=9, lambda=10, mu=11, nu=12
+type: A, B
+# Initial condition
+number of particles: 9
+state max: 100
+fill: A20 0.5, A21 0.5
+# enzyme has form: e.g. B0 - B20 - B22 - B11 - B23 - B21 - B0 (I've just put the B_nu in the middle of the chain)
+# which will catalyse A20 + A21 -> A22-A23
+# Rules
+Ax Bx -> Ax-B1
+Ax-B1 -> Ax Bx
+B0-B1 -> B2-B3
+B3-Ax -> Bx-A4
+A4 A4 -> A5-A5
+Bx-A5 -> B6-Ax
+B6-B2 -> B7-B8
+B7-Ax -> Bx-A9
+B8-Bx -> B10-Bx : 0.01
+B10-Bx -> Bx-B10
+B10-B11 -> B12-B11
+A9-Bx -> Ax Bx : 0.0001
