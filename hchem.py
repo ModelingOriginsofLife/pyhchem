@@ -732,10 +732,11 @@ class HChemViewer:
 
 if __name__ == '__main__':
     if len(sys.argv) == 2:
+        print "Usage: python",sys.argv[0],"<rules_filename> [optional: particles_filename]"
         sim = HChem(sys.argv[1])
     elif len(sys.argv) == 3:
         sim = HChem(sys.argv[1],sys.argv[2])
     else:
         print "Usage: python",sys.argv[0],"<rules_filename> [optional: particles_filename]"
-        sim = HChem("models/universal_enzyme.txt")
+        exit()
     HChemViewer(sim).loop()
