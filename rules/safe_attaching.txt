@@ -8,7 +8,7 @@ number of particles: 100
 state max: 100
 fill: A0 0.5, A1 0.5
 
-# start with e.g. B20-B0-B25-B25 (other things attached on the right)
+# start with e.g. B20-B0-B2-B3-B1-B20
 
 # Rules
 Ax Bx -> Ax-Bx
