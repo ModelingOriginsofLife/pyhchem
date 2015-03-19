@@ -8,8 +8,6 @@ import numpy as np
 import numpy.linalg as la
 import pygame, pickle
 import re, sys, os, time, math, datetime
-import Tkinter as tk
-import tkMessageBox
 
 class HChemRule:
     def __init__(self, filename):
@@ -254,9 +252,9 @@ class HChem:
     # k   : strength of bonds
     # w,h : width and height of the universe
     # seed: random seed
-    def __init__(self, filename, n = 1000, r = 10, v0 = None, dt = 0.1,
+    def __init__(self, rules_filename, particles_filename = None, n = 1000, r = 10, v0 = None, dt = 0.1,
                  width = 1200, height = 700, bucket_size = None, seed=None):
-        self.rule = HChemRule(filename)
+        self.rule = HChemRule(rules_filename)
         if seed: np.random.seed(seed)
         if v0 == None: v0 = r
         if bucket_size == None: bucket_size = 2*r
@@ -302,6 +300,9 @@ class HChem:
         self.nbx = int(math.ceil(float(width)/bucket_size))
         self.nby = int(math.ceil(float(height)/bucket_size))
         self.buckets = np.zeros((self.nbx, self.nby), dtype=object)
+        
+        if particles_filename:
+            self.load_particles( particles_filename )
 
     def bucket_index(self, x):
         return (min(max(int(x[0]/self.bucket_size), 0), self.nbx-1),
@@ -482,9 +483,7 @@ class HChem:
                     bonds = " ".join(map(str, self.bonds[k]))
                     f.write(bonds); f.write("\n")
         except Exception as e:
-            root = tk.Tk()
-            root.withdraw()
-            tkMessageBox.showerror('Error', str(e))
+            print "Error:",str(e)
 
     def load_particles(self, fname):
         try:
@@ -500,9 +499,7 @@ class HChem:
                     pos.append((float(p0), float(p1)))
                     vel.append((float(v0), float(v1)))
                     if not self.rule.is_valid_type(t):
-                        root = tk.Tk()
-                        root.withdraw()
-                        tkMessageBox.showerror('Error', 'Unknown type:' + t)
+                        print "Unknown type:",t
                         return
                     types.append(t)
                 for k in xrange(n):
@@ -516,9 +513,7 @@ class HChem:
                 self.bonds = bonds
 
         except Exception as e:
-            root = tk.Tk()
-            root.withdraw()
-            tkMessageBox.showerror('Error', str(e))
+            print "Error:",str(e)
 
     def load(self, fname, type):
         if type == "particles":
@@ -585,33 +580,15 @@ class HChemViewer:
         return None
 
     def ask_particle(self):
-        i = self.get_clicked()
-        dialog = tk.Tk()
-        dialog.title("Enter particle type and state")
-        type = tk.StringVar(dialog)
-        tk.Label(dialog, text = "type").pack(side=tk.LEFT)
-        entry = tk.Entry(dialog, textvariable=type)
-        entry.focus_force()
-        entry.pack(side=tk.LEFT)
-        entry.bind('<Return>', lambda evt: dialog.destroy())
-        dialog.mainloop()
-        return type.get()
+        return raw_input("Enter particle type and state: ")
 
     def ask_file(self, title):
-        dialog = tk.Tk()
-        dialog.title(title)
-        filename = tk.StringVar(dialog)
-        savetype = tk.StringVar(dialog)
-        savetype.set("particles")
-        tk.Radiobutton(dialog, text="Particles", variable=savetype, value="particles").pack(anchor = tk.W)
-        tk.Radiobutton(dialog, text="Rules", variable=savetype, value="rules").pack(anchor = tk.W)
-        tk.Label(dialog, text = "filename").pack(side=tk.LEFT)
-        entry = tk.Entry(dialog, textvariable=filename)
-        entry.focus_force()
-        entry.pack(side=tk.LEFT)
-        entry.bind('<Return>', lambda evt: dialog.destroy())
-        dialog.mainloop()
-        return filename.get(), savetype.get()
+        filename = raw_input("Enter filename: ")
+        if ".dat" in filename:
+            savetype = "particles"
+        else:
+            savetype = "rules"
+        return filename, savetype
 
     def check_event(self):
         for event in pygame.event.get():
@@ -754,8 +731,11 @@ class HChemViewer:
             pygame.display.update()
 
 if __name__ == '__main__':
-    if len(sys.argv) >= 2:
+    if len(sys.argv) == 2:
         sim = HChem(sys.argv[1])
+    elif len(sys.argv) == 3:
+        sim = HChem(sys.argv[1],sys.argv[2])
     else:
+        print "Usage: python",sys.argv[0],"<rules_filename> [optional: particles_filename]"
         sim = HChem("models/universal_enzyme.txt")
     HChemViewer(sim).loop()
