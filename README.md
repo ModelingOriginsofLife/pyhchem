@@ -8,9 +8,9 @@ Usage:
   
 e.g.
 
-    python hchem.py rules\binding_enzyme4.txt particles\binding_enzyme4b.dat
+    python hchem.py rules\binding_enzyme4.txt particles\binding_enzyme4.dat
 
-(This loads a binding enzyme. Hit 'P' to run and watch it make A22-A23 pairs!)
+(This loads a binding enzyme. Hit 'P' to run and watch it make A22-A23 pairs, if you're lucky.)
 
 The terminal window is used for input, so keep it handy.
 
