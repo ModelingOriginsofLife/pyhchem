@@ -247,17 +247,17 @@ class HChemRule:
         if bound:
             if (L0, L1) in self.ruleb:
                 possible_reactions += self.ruleb[(L0, L1)]
-            if (L1, L0) in self.ruleb:
-                reversed_rules = self.ruleb[(L1, L0)]
-                for a,b,c,d in reversed_rules:
-                    possible_reactions += [(b,a,c,d)]
+            #if (L1, L0) in self.ruleb:
+            #    reversed_rules = self.ruleb[(L1, L0)]
+            #    for a,b,c,d in reversed_rules:
+            #        possible_reactions += [(b,a,c,d)]
         else:
             if (L0, L1) in self.ruleu:
                 possible_reactions += self.ruleu[(L0, L1)]
-            if (L1, L0) in self.ruleu:
-                reversed_rules = self.ruleu[(L1, L0)]
-                for a,b,c,d in reversed_rules:
-                    possible_reactions += [(b,a,c,d)]
+            #if (L1, L0) in self.ruleu:
+            #    reversed_rules = self.ruleu[(L1, L0)]
+            #    for a,b,c,d in reversed_rules:
+            #        possible_reactions += [(b,a,c,d)]
         if len( possible_reactions ) == 0:
             return None
         return possible_reactions
