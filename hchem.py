@@ -243,18 +243,24 @@ class HChemRule:
         f.close()
 
     def check(self, L0, L1, bound):
+        possible_reactions = []
         if bound:
             if (L0, L1) in self.ruleb:
-                return self.ruleb[(L0, L1)]
+                possible_reactions += self.ruleb[(L0, L1)]
             if (L1, L0) in self.ruleb:
-                return self.ruleb[(L1, L0)]
-            return None
+                reversed_rules = self.ruleb[(L1, L0)]
+                for a,b,c,d in reversed_rules:
+                    possible_reactions += [(b,a,c,d)]
         else:
             if (L0, L1) in self.ruleu:
-                return self.ruleu[(L0, L1)]
+                possible_reactions += self.ruleu[(L0, L1)]
             if (L1, L0) in self.ruleu:
-                return self.ruleu[(L1, L0)]
+                reversed_rules = self.ruleu[(L1, L0)]
+                for a,b,c,d in reversed_rules:
+                    possible_reactions += [(b,a,c,d)]
+        if len( possible_reactions ) == 0:
             return None
+        return possible_reactions
 
 class HChem:
     # n   : number of particles
