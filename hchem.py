@@ -714,6 +714,7 @@ class HChemViewer:
             if self.display_types:
                 for k in xrange(sim.n):
                     t = sim.rule.get_name(sim.types[k])
+                    t = t[1:] # DEBUG: just draw the state
                     text = self.font.render(t, False, self.BLACK)
                     rect = text.get_rect()
                     rect.centerx = pos[k,0]
