@@ -565,7 +565,8 @@ class HChemViewer:
         pygame.display.set_caption("Tim Hutton's Artificial Chemistry")
         self.fontsize = 18
         self.font = pygame.font.SysFont(None, self.fontsize)
-        info_texts = self.INFO + sim.rule.rule_texts
+        # info_texts = self.INFO + sim.rule.rule_texts
+        info_texts = self.INFO # prefer not to see rules at the moment
         self.info = map(lambda text: self.font.render(text, False, self.BLUE),
                 info_texts)
 
@@ -580,7 +581,7 @@ class HChemViewer:
         self.which_dragged = None
         self.moving        = False
         self.binding       = False
-        self.display_types = False
+        self.display_types = True
         self.prev_lclick   = time.time()
 
     def get_clicked(self):
