@@ -69,7 +69,11 @@ class HChemRule:
             M0, M1 = str.split("-")
         else:
             bnd = False
-            M0, M1 = str.split()
+            output_reactants = str.split()
+            if len( output_reactants ) < 2:
+                raise Exception( "Too few reactants" )
+            M0 = output_reactants[0]
+            M1 = output_reactants[1]
         p = re.search(r'([a-wzA-Z]+)(\d+|[xy])', M0)
         q = re.search(r'([a-wzA-Z]+)(\d+|[xy])', M1)
         return (p.group(1), p.group(2), q.group(1), q.group(2), bnd)
@@ -155,8 +159,12 @@ class HChemRule:
         if ":" in rhs:
             rhs, p = rhs.split(":")
             prob = eval(p.strip())
-        L0, l0, L1, l1, lbnd = self.parse_expr(lhs.strip())
-        R0, r0, R1, r1, rbnd = self.parse_expr(rhs.strip())
+        try:
+            L0, l0, L1, l1, lbnd = self.parse_expr(lhs.strip())
+            R0, r0, R1, r1, rbnd = self.parse_expr(rhs.strip())
+        except Exception as e:
+            print "Error parsing line:",line
+            exit()
         if L0 in self.wildcards and L1 in self.wildcards:
             if L0 == L1:
                 for t in self.types:
@@ -495,11 +503,12 @@ class HChem:
                 types = []
                 bonds = []
                 for k in xrange(n):
-                    t, p0, p1, v0, v1 = f.readline().strip().split(",")
+                    line = f.readline()
+                    t, p0, p1, v0, v1 = line.strip().split(",")
                     pos.append((float(p0), float(p1)))
                     vel.append((float(v0), float(v1)))
                     if not self.rule.is_valid_type(t):
-                        print "Unknown type:",t
+                        print "Unknown type on line:",line
                         return
                     types.append(t)
                 for k in xrange(n):
