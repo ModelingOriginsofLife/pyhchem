@@ -244,13 +244,17 @@ class HChemRule:
 
     def check(self, L0, L1, bound):
         if bound:
-            if not (L0, L1) in self.ruleb:
-                return None
-            return self.ruleb[(L0, L1)]
+            if (L0, L1) in self.ruleb:
+                return self.ruleb[(L0, L1)]
+            if (L1, L0) in self.ruleb:
+                return self.ruleb[(L1, L0)]
+            return None
         else:
-            if not (L0, L1) in self.ruleu:
-                return None
-            return self.ruleu[(L0, L1)]
+            if (L0, L1) in self.ruleu:
+                return self.ruleu[(L0, L1)]
+            if (L1, L0) in self.ruleu:
+                return self.ruleu[(L1, L0)]
+            return None
 
 class HChem:
     # n   : number of particles
