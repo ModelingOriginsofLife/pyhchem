@@ -20,32 +20,41 @@ Ax-B3 -> Ax Bx
 B3-B0 -> B4-B5
 # we take a copy of what the input state was (hopefully it hasn't changed!) to allow the enzyme to reset later
 B4-Ax -> Bx-Ax
-# now B5 is a runner, moves randomly until reaches the B2 (or B12) stopper in the middle
+# B5 runs to the middle:
 B5-B2 -> B6-B12           # first runner to arrive changes the middle stopper to 12 (and itself to 6)
 B5-B12 -> B14-B13         # second runner changes stopper to 13 and itself to 14
 B5-B1 -> B5-B1            # don't move past the end stoppers
 B5-Bx -> Bx-B5 : 0.01     # running (also using reaction order to ensure we don't move past the stopper, more general case of the three reactions above)
 B13-B6 -> B2-B14          # middle stopper then notifies the first runner to also change itself to 14 and resets
-# now we want to bond the attached reactants reasonably quickly, to avoid the problem of multiple enzymes getting linked
-# B14 is a runner:
+# now we want to bond the attached reactants
+# B14 runs to the reactant:
 B14-B2 -> B14-B2          # don't move past the middle stopper
 B14-B1 -> B14-B1          # don't move past the end stoppers
 B14-Bx -> Bx-B14 : 0.01   # running (also using reaction order to ensure we don't move past the stopper, more general case of reaction above)
 B14-Ax -> B15-A7          # mark the reactant as ready to bond (since now we know we have two attached)
-# now we want to run again to the middle with B15 so that when the reactants bond they can take their new state 
-# (hopefully we reach the middle before the reactants take their output state!)
-B15-B2 -> B16-B2          # stop at the middle stopper
-B15-B1 -> B15-B1          # don't move past the end stoppers
-B15-Bx -> Bx-B15 : 0.01   # running (also using reaction order, more general case of two reactions above)
-A7 A7 -> A8-A8            # reactants bond! (hopefully the two we are holding, fatal if not)
-B16 A8 -> B16 A17         # bump check (hoping to ensure that reactant takes correct output state, could do more here)
-A17-Bx -> Ax-B9           # reactants take their new state
-# (we don't debond at that point because then the enzyme couldn't reset)
-B9-B16 -> B10-B11
-B10-Ax -> Bx Ax           # store the output state on the enzyme and debond the reactant
+A7 A7 -> A8-A32           # reactants bond! (hopefully the two we are holding, fatal if not)
+# (note that this introduces an asymmetry, allowing us to use a bump later on the matching side)
+A8-B15 -> A8-B16          # now side1 knows that the atoms have bondedq
+A32-B15 -> A32-B33        # now side2 knows that the atoms have bonded
+# B16 runs to the middle, so that the reactants can take their new state safely:
+B16-B2 -> B17-B2          # B16 arrives at the middle stopper, changes itself to 17
+B16-B1 -> B16-B1          # don't move past the end stoppers
+B16-Bx -> Bx-B16 : 0.01   # running (also using reaction order, more general case of two reactions above)
+# B33 runs to the middle, so that the reactants can take their new state safely:
+B33-B2 -> B34-B2          # B33 arrives at the middle stopper, changes itself to 34
+B33-B1 -> B33-B1          # don't move past the end stoppers
+B33-Bx -> Bx-B33 : 0.01   # running (also using reaction order, more general case of two reactions above)
+# bump on the matching side
+B17 A8 -> B18 A30         # bump to tell this side of the reactant that this side's runner is at the middle stopper
+B34 A32 -> B35 A36        # bump to tell this side of the reactant that this side's runner is at the middle stopper
+A30-A36 -> A31-A37        # both sides have been bumped
+A31 B18 -> A38 B19        # bump back to say that both reactants are ready to depart
+A37 B35 -> A38 B19        # bump back to say that both reactants are ready to depart
+A38-Bx -> Ax Bx           # reactants take their new state and immediately debond
 # now the reaction product is released and we can reset
-# B11 is now a runner, moves randomly (but not across the middle stopper) until reaches the B1 stopper
-B11-B2 -> B11-B2          # specific case of below; don't cross the middle stopper
-B11-B1 -> B0-B1           # reset when we reach the end stopper. enzyme is ready to go again!
-B11-Bx -> Bx-B11 : 0.01   # running (also using reaction order, more general case of the two reactions above)
-
+# B19 runs to the ends to reset
+B19-B2 -> B19-B2          # don't cross the middle stopper
+B19-B12 -> B19-B12        # don't cross the middle stopper in its waiting state either
+B19-B1 -> B0-B1           # reset when we reach the end stopper. enzyme is ready to go again!
+B19-Bx -> Bx-B19 : 0.001  # running (also using reaction order, more general case of the two reactions above)
+# (extra slow to allow enzymes to depart with the right state)
