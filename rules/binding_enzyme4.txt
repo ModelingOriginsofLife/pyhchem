@@ -10,7 +10,7 @@ fill: A20 0.5, A21 0.5
 # enzyme has form: B1 - B0 - Bi - Bp - B2 - Bq - Bj - B0 - B1 (a stopper at each end and in the middle, with two runners)
 # which should catalyse Ai + Aj -> Ap-Aq
 
-# e.g. B1 - B0 - B20 - B21 - B2 - B22 - B21 - B0 - B1 which should catalyse A20 + A21 -> A22-A23
+# e.g. B1 - B0 - B20 - B22 - B2 - B23 - B21 - B0 - B1 which should catalyse A20 + A21 -> A22-A23
 # (but then has problem of bonding happening on different sides - one solution is to link with B1's around the back
 
 # initial bonding (often in the wrong place but is quickly reversible)
@@ -34,7 +34,7 @@ B14-Bx -> Bx-B14 : 0.01   # running (also using reaction order to ensure we don'
 B14-Ax -> B15-A7          # mark the reactant as ready to bond (since now we know we have two attached)
 A7 A7 -> A8-A32           # reactants bond! (hopefully the two we are holding, fatal if not)
 # (note that this introduces an asymmetry, allowing us to use a bump later on the matching side)
-A8-B15 -> A8-B16          # now side1 knows that the atoms have bondedq
+A8-B15 -> A8-B16          # now side1 knows that the atoms have bonded
 A32-B15 -> A32-B33        # now side2 knows that the atoms have bonded
 # B16 runs to the middle, so that the reactants can take their new state safely:
 B16-B2 -> B17-B2          # B16 arrives at the middle stopper, changes itself to 17
