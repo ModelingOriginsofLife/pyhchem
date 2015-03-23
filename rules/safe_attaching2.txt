@@ -1,0 +1,36 @@
+# Another idea for safe attaching. Need to partition the states into ordinary ones and enzyme ones but
+# I'm hoping we can find a way to do this.
+# special states alpha=20, beta=21, gamma=22, delta=23, epsilon=24, zeta=25
+
+type: A, B
+
+# Initial condition
+number of particles: 100
+state max: 100
+fill: A0 0.5, A1 0.5
+
+# start with e.g. B20-B0-B1-B20 to capture A0 at one end and A1 at the other
+
+# B20 joins temporarily with any A in an ordinary state:
+A0 B20 -> A0-B21
+A1 B20 -> A1-B21
+# etc.
+# (N.B we need a new notation for this. Intention: Ax B20 -> Ax-B21 where x is an ordinary state)
+
+# B21 takes on the state of its neighboring B
+B21-Bx -> Bx-Bx
+
+# if A is bonded to a matching state then it means we've captured the right thing
+A0-B0 -> A26-B22
+A1-B1 -> A26-B22       
+# etc.
+# (N.B we need a new notation for this. Intention: Ax-Bx -> A26-B22 where x is an ordinary state)
+
+# if A is now bonded to a non-matching state then it means we've captured the wrong thing, release and reset
+A1-B0 -> A1 B20
+A0-B1 -> A0 B20
+# etc.
+# (N.B. we need a new notation for this. Intention: Ax-By -> Ax B20 where x,y are ordinary states and x != y)
+
+# we pass the message that we've bonded the right thing
+B22-Bx -> Bx-B23
