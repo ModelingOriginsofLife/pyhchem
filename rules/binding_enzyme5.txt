@@ -1,0 +1,22 @@
+# Tim trying to use Matteo's safe-attaching idea in a binding enzyme
+# special states alpha=20, beta=21, gamma=22, delta=23, epsilon=24, zeta=25
+
+type: A, B
+
+# Initial condition
+number of particles: 100
+state max: 100
+fill: A0 0.5, A1 0.5
+
+# start with e.g. B20-B0-... to capture A0
+
+# B20 joins temporarily with any A:
+Ax B20 -> Ax-B21
+Ax-B21 -> Ax B20
+# B21 runs:
+B21-Bx -> Bx-B21 : 0.1    # has to run slowly so that the two operations below always happen together
+B21-B25 -> B21-B25        # don't run past the middle stopper
+# if A is now bonded to a matching state then it means we've captured one
+Ax-Bx -> Ax-B22
+B22-B21 -> B23-B24
+
