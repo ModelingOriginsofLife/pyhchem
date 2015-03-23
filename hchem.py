@@ -284,6 +284,7 @@ class HChem:
         self.w = width
         self.h = height
         self.speed = 10
+        self.show_applied_rules = True
 
         # Initialize positions of particles
         self.pos = np.zeros((n, 2))
@@ -359,17 +360,18 @@ class HChem:
                 for r in rules:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
-                        # print "apply:",
-                        # print self.rule.get_name(self.types[k]),
-                        # print "-",
-                        # print self.rule.get_name(self.types[l]),
-                        # print " -> ",
-                        # print self.rule.get_name(r[0]),
-                        # if r[2]:
-                        #     print "-",
-                        # else:
-                        #     print " ",
-                        # print self.rule.get_name(r[1])
+                        if self.show_applied_rules:
+                            print "apply:",
+                            print self.rule.get_name(self.types[k]),
+                            print "-",
+                            print self.rule.get_name(self.types[l]),
+                            print " -> ",
+                            print self.rule.get_name(r[0]),
+                            if r[2]:
+                                print "-",
+                            else:
+                                print " ",
+                            print self.rule.get_name(r[1])
                         self.types[k] = r[0]
                         self.types[l] = r[1]
                         if not r[2]:
@@ -385,17 +387,18 @@ class HChem:
                 for r in rules:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
-                        # print "apply:",
-                        # print self.rule.get_name(self.types[k]),
-                        # print " ",
-                        # print self.rule.get_name(self.types[l]),
-                        # print " -> ",
-                        # print self.rule.get_name(r[0]),
-                        # if r[2]:
-                        #     print "-",
-                        # else:
-                        #     print " ",
-                        # print self.rule.get_name(r[1])
+                        if self.show_applied_rules:
+                            print "apply:",
+                            print self.rule.get_name(self.types[k]),
+                            print " ",
+                            print self.rule.get_name(self.types[l]),
+                            print " -> ",
+                            print self.rule.get_name(r[0]),
+                            if r[2]:
+                                print "-",
+                            else:
+                                print " ",
+                            print self.rule.get_name(r[1])
                         self.types[k] = r[0]
                         self.types[l] = r[1]
                         if r[2]:
