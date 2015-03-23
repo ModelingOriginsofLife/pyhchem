@@ -9,7 +9,7 @@ number of particles: 100
 state max: 100
 fill: A0 0.5, A1 0.5
 
-# start with e.g. B20-B0-B1-B20 to capture A0 at one end and A1 at the other
+# start with e.g. B20-B0-B24-B1-B20 to capture A0 at one end and A1 at the other
 
 # B20 joins temporarily with any A in an ordinary state:
 A0 B20 -> A0-B21
