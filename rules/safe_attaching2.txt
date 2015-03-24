@@ -8,9 +8,9 @@ number of particles: 100
 state max: 100
 fill: A0 0.5, A1 0.5
 
-# start with e.g. B20-B0-B24-B1-B20 to capture A0 at one end and A1 at the other
+# start with e.g. B20-B0-B1-B20 to capture A0 at one end and A1 at the other
 
-# B20 joins temporarily with any A in an ordinary state:
+# B20 joins temporarily with any A:
 Ax B20 -> Ax-B21
 
 # B21 takes on the state of its neighboring B
@@ -21,3 +21,4 @@ Ax-Bx -> A22-B22
 
 # if A is now bonded to a non-matching state then it means we've captured the wrong thing, release and reset
 Ax-By -> Ax B20 : 0.01
+# (really need a new notation to specify that x != y)
