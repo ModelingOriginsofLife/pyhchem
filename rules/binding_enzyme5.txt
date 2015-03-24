@@ -21,3 +21,12 @@ B21-Bx -> Bx-B21 : 0.1    # has to run slowly so that the two operations above a
 
 # copy the state out of the reactant (hopefully it hasn't changed in the meanwhile)
 Ax-B23 -> A31-Bx
+
+B24-B24 -> B25-B25
+
+# B25 runs to the A31 reactants (safe)
+B25-A31 -> B26-A32
+B25-Bx -> Bx-B25
+
+# the reactants can now bond (hopefully the two we are holding)
+A32 A32 -> A33-A33
