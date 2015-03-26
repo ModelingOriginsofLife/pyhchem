@@ -270,7 +270,7 @@ class HChem:
     # k   : strength of bonds
     # w,h : width and height of the universe
     # seed: random seed
-    def __init__(self, rules_filename, particles_filename = None, n = 1000, r = 10, v0 = None, dt = 0.1,
+    def __init__(self, rules_filename, particles_filename = None, n = 1000, r = 12, v0 = None, dt = 0.1,
                  width = 1200, height = 700, bucket_size = None, seed=None):
         self.rule = HChemRule(rules_filename)
         if seed: np.random.seed(seed)
