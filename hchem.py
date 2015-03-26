@@ -284,7 +284,7 @@ class HChem:
         self.w = width
         self.h = height
         self.speed = 10
-        self.show_applied_rules = True
+        self.show_applied_rules = False
 
         # Initialize positions of particles
         self.pos = np.zeros((n, 2))
