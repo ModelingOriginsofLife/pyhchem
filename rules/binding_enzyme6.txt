@@ -37,9 +37,9 @@ B28-B28 -> B27-B27
 B27-Bx -> Bx-Bx
 A31-B40 -> A31-B34
 B34-Bx -> B27-B27
-A31-Bx -> Ax B32 : 0.005
+A31-Bx -> Ax B32 : 0.0002
 
 # detach and reset the output carrier
 B32-B40 -> B32-B40
-B32-Bx -> B33 B25 : 0.01
+B32-Bx -> B33 B25 : 0.001
 B33-Bx -> B33-B40
