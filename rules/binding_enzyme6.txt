@@ -1,0 +1,21 @@
+# Matteo's 'attach and grasp' from an email 2015-03-26
+# special states alpha=20, beta=21, gamma=22, delta=23, epsilon=24, zeta=25
+
+type: A, B, C
+
+# Initial condition
+number of particles: 100
+state max: 100
+fill: A0 0.5, A1 0.5
+
+# start with e.g. B20-B0-... to capture A0 but enclose all but attachments points in inert C
+
+# AB particles with matching state are 'sticky'
+Ax Bx -> Ax-Bx
+Ax-Bx -> Ax Bx
+
+# alpha is a runner
+B20-Bx -> Bx-B20
+
+# if alpha finds itself bonded to an A then we must have attached the right kind of A
+B20-Ax -> B21-Ax
