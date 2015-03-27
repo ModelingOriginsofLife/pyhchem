@@ -10,7 +10,7 @@ e.g.
 
     python hchem.py rules\binding_enzyme4.txt particles\binding_enzyme4.dat
 
-(This loads a binding enzyme. Hit 'P' to run and watch it make A22-A23 pairs, if you're lucky.)
+(This loads a binding enzyme. Hit 'P' to run and watch it bond A0 and A1 atoms into A2-A3 pairs, if you're lucky.)
 
 The terminal window is used for input, so keep it handy.
 
