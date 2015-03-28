@@ -43,7 +43,7 @@ B43-B3 -> B47-B3
 
 # for bonding:
 B44-B26 -> B42 B44
-B44-Ax -> B48-A44
+B44-Ax -> Bx-A44
 A44 A44 -> A30-A30 # A30 = "got the correct bond type, proceed"
 A44-A44 -> A35-A35 # A35 = "got the wrong bond type, revert"
 
@@ -70,19 +70,11 @@ A47-A47 -> A35-A35
 # the result will be mismatched states in the reactant pairs and could get stuck.
 
 # A30 = attach the output carrier, we got the right thing
-A30-B48 -> A30-B49
+A30-Bx -> A30-B49
 B49 B25 -> B26-B28
 
 # A35 = revert, we got the wrong thing
-A35-B48 -> A36-B37
-# attach the input carrier and cause the input state to be copied
-# (uses the same mechanism as for the assignment of the output state, below)
-B37 B24 -> B27-B27
-# after a delay, debond the reactants
-A36-Bx -> Ax B41 : 0.0005
-# reset
-B41-B40 -> B41-B40
-B41-Bx -> B20-B20 : 0.001
+A35-Bx -> Ax B33
 
 # make two more copies of the output state, pass it to the A and debond
 B26-A30 -> B28-A31
