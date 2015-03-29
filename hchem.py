@@ -291,6 +291,13 @@ class HChem:
         self.pos[:,0] = np.random.uniform(r, width-r, n)
         self.pos[:,1] = np.random.uniform(r, height-r, n)
 
+        # Initialize velocities of particles
+        # N.B. this discards the velocities for particles files loaded on the command line
+        direction = np.random.uniform(0, 2*np.pi, n)
+        self.vel = np.zeros((n, 2))
+        self.vel[:,0] = v0*np.cos(direction)
+        self.vel[:,1] = v0*np.sin(direction)
+
         # Initialize types
         self.types = np.zeros(n, dtype=int)
         for k in xrange(self.n):
@@ -317,14 +324,13 @@ class HChem:
         
         if particles_filename:
             self.load_particles( particles_filename )
-
-        # Initialize velocities of particles
-        # N.B. this discards the velocities for particles files loaded on the command line
-        direction = np.random.uniform(0, 2*np.pi, self.n)
-        self.vel = np.zeros((self.n, 2))
-        self.vel[:,0] = v0*np.cos(direction)
-        self.vel[:,1] = v0*np.sin(direction)
-        print "Randomizing velocites. If want stored velocities, reload the particles file."
+            # Randomize velocities of particles
+            # N.B. this discards the velocities for particles files loaded on the command line
+            direction = np.random.uniform(0, 2*np.pi, self.n)
+            self.vel = np.zeros((self.n, 2))
+            self.vel[:,0] = v0*np.cos(direction)
+            self.vel[:,1] = v0*np.sin(direction)
+            print "Randomizing velocites. If want stored velocities, reload the particles file."
 
     def bucket_index(self, x):
         return (min(max(int(x[0]/self.bucket_size), 0), self.nbx-1),
