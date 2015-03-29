@@ -277,6 +277,7 @@ class HChem:
         self.h = height
         self.speed = 10
         self.show_applied_rules = False
+        self.randomize_rule_order = False
 
         # Initialize positions of particles
         self.pos = np.zeros((n, 2))
@@ -355,7 +356,8 @@ class HChem:
             # bound pair
             rules = self.rule.check(self.types[k], self.types[l], True)
             if rules:
-                np.random.shuffle( rules )
+                if self.randomize_rule_order:
+                    np.random.shuffle( rules )
                 for r in rules:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
@@ -383,7 +385,8 @@ class HChem:
             # unbound pair
             rules = self.rule.check(self.types[k], self.types[l], False)
             if rules:
-                np.random.shuffle( rules )
+                if self.randomize_rule_order:
+                    np.random.shuffle( rules )
                 for r in rules:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
