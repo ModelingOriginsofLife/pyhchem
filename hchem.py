@@ -355,6 +355,7 @@ class HChem:
             # bound pair
             rules = self.rule.check(self.types[k], self.types[l], True)
             if rules:
+                np.random.shuffle( rules )
                 for r in rules:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
@@ -382,6 +383,7 @@ class HChem:
             # unbound pair
             rules = self.rule.check(self.types[k], self.types[l], False)
             if rules:
+                np.random.shuffle( rules )
                 for r in rules:
                     p = r[3]
                     if np.random.uniform(0, 1) < p:
