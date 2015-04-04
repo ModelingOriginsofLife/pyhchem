@@ -8,9 +8,9 @@ Usage:
   
 e.g.
 
-    python hchem.py rules\binding_enzyme6.txt particles\binding_enzyme6.dat
+    python hchem.py rules\programmable_enzyme.txt particles\programmable_enzyme.dat
 
-(This loads a binding enzyme. Hit 'P' to run and watch it bond A0 and A1 atoms into A2-A3 pairs, if you're lucky.)
+This loads a programmable enzyme. Hit 'P' to run and watch it bond A0 and A1 atoms into A2-A3 pairs, if you're lucky.
 
 The terminal window is used for input, so keep it handy.
 
