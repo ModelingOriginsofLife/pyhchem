@@ -17,3 +17,5 @@ The terminal window is used for input, so keep it handy.
 Commands:
   * 'L' to load rules (.txt files in rules folder) or particles (.dat files in particles folder).
   * 'S' to save rules or particles.
+
+![pyhchem_programmable_enzyme](https://cloud.githubusercontent.com/assets/647092/6994944/36f8596a-db23-11e4-849f-96dd1a940080.png)
