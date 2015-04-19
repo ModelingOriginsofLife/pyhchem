@@ -1,0 +1,46 @@
+# reaction set for replication of binary strings, without using types
+
+type: A
+
+# Initial condition
+number of particles: 100
+state max: 100
+fill: A4 1.0
+
+# 1,0 : bases
+# 2 = head, 3 = tail
+# 4 = free floating
+# 6 = 0 that has been copied
+# 7 = 1 that has been copied
+# 8 marks the center
+# 11 asks for next base
+# 12 carries '0'
+# 13 carries '1'
+# e.g. 2-1-0-1-0-3 becomes 2-1-0-7-6-8-6-7-5 then 2-1-0-1-0-3 3-0-1-0-1-2
+
+# tail initiates copying:
+A3 A4 -> A8-A5
+# main copy loop:
+A5 A4 -> A11-A10
+A11-A6 -> A6-A11
+A11-A7 -> A7-A11
+A11-A8 -> A8-A11
+A0-A11 -> A6-A12
+A1-A11 -> A7-A13
+A12-A6 -> A6-A12
+A12-A7 -> A7-A12
+A12-A8 -> A8-A12
+A13-A6 -> A6-A13
+A13-A7 -> A7-A13
+A13-A8 -> A8-A13
+A12-A10 -> A6-A5
+A13-A10 -> A7-A5
+# reset the original and release:
+A2-A11 -> A2-A14
+A14-A6 -> A0-A14
+A14-A7 -> A1-A14
+A14-A8 -> A3 A15
+# reset the daughter
+A15 A4 -> A14-A3
+A14-A10 -> A2 A9
+# (could release spare particle as A4 (food) but perhaps more interesting as waste)
